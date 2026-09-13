@@ -1,0 +1,44 @@
+%% Excalidraw domain model
+%% Conceptual classes from the problem domain (collaborative drawing/whiteboarding),
+%% not from the codebase's implementation classes.
+%% No methods, no visibility markers, no types on attributes — this is a domain model,
+%% not a class diagram.
+
+classDiagram
+    class Drawing {
+        title
+        createdOn
+        lastModifiedOn
+    }
+    class Element {
+        category
+        position
+        rotation
+        opacity
+    }
+    class Group {
+        label
+    }
+    class Frame {
+        name
+    }
+    class Collaborator {
+        displayName
+        cursorColor
+    }
+    class CollaborationSession {
+        roomCode
+        startedOn
+    }
+    class Library {
+        title
+        source
+    }
+
+    Drawing "1 owner" --> "0..* elements" Element : contains
+    Drawing "1 hostedDrawing" --> "0..1 session" CollaborationSession : hosted in
+    CollaborationSession "1 session" --> "2..* participants" Collaborator : includes
+    Collaborator "1 author" --> "0..* authoredElements" Element : creates
+    Element "0..* members" --> "0..1 group" Group : belongs to
+    Element "0..* placedElements" --> "0..1 frame" Frame : organized within
+    Library "0..* libraries" --> "0..* drawings" Drawing : supplies templates to
