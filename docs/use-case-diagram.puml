@@ -1,0 +1,27 @@
+@startuml use-case-diagram
+' Excalidraw use case diagram — Assignment: Requirements and Use Cases
+!pragma layout smetana
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Drawer\n(end user)" as Drawer
+actor "Collaboration Backend\n(WebSocket relay + Firestore)" as Backend
+actor "Maintainer\n(reviews Sentry crash reports)" as Maintainer
+
+rectangle "Excalidraw" {
+  usecase "Draw a Diagram" as UC1
+  usecase "Collaborate in Real Time" as UC2
+  usecase "Export a Drawing" as UC3
+}
+
+Drawer -- UC1
+Drawer -- UC2
+Drawer -- UC3
+UC2 -- Backend
+
+UC1 ..> Maintainer : notifies\n<<crash telemetry>>
+UC2 ..> Maintainer : notifies\n<<crash telemetry>>
+UC3 ..> Maintainer : notifies\n<<crash telemetry>>
+
+@enduml
