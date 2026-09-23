@@ -54,8 +54,6 @@ Noun phrases are pulled from the Preconditions, Success Guarantee, Main Success 
 
 ### Updated Domain Model
 
-![Excalidraw domain model](domain-model.png)
-
 ```mermaid
 classDiagram
     class Drawing {
@@ -120,8 +118,6 @@ Each SSD shows only the primary actor, the system as a single black box (`:Excal
 
 ### SSD: Draw a Diagram
 
-![SSD: Draw a Diagram](ssd-draw-a-diagram.png)
-
 ```mermaid
 sequenceDiagram
     actor Drawer
@@ -144,8 +140,6 @@ Source: [`docs/ssd-draw-a-diagram.mmd`](ssd-draw-a-diagram.mmd).
 
 ### SSD: Collaborate in Real Time
 
-![SSD: Collaborate in Real Time](ssd-collaborate-in-real-time.png)
-
 ```mermaid
 sequenceDiagram
     actor Host as Drawer (host)
@@ -167,8 +161,6 @@ This use case has two Drawer instances — the host who starts the session and t
 Source: [`docs/ssd-collaborate-in-real-time.mmd`](ssd-collaborate-in-real-time.mmd).
 
 ### SSD: Export a Drawing
-
-![SSD: Export a Drawing](ssd-export-a-drawing.png)
 
 ```mermaid
 sequenceDiagram
