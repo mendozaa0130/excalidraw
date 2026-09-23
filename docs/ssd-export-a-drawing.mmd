@@ -1,0 +1,12 @@
+%% SSD: Export a Drawing
+%% Primary actor: Drawer. System: single black box (:ExcalidrawSystem).
+
+sequenceDiagram
+    actor Drawer
+    participant S as :ExcalidrawSystem
+
+    Drawer->>S: openExportDialog(drawingId)
+    S-->>Drawer: preview
+    Drawer->>S: setExportOptions(background, padding, scale)
+    Drawer->>S: exportDrawing(format)
+    S-->>Drawer: file

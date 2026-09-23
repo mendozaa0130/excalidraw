@@ -13,6 +13,7 @@ classDiagram
     class Element {
         category
         position
+        size
         rotation
         opacity
     }
@@ -28,11 +29,19 @@ classDiagram
     }
     class CollaborationSession {
         roomCode
+        encryptionKey
         startedOn
     }
     class Library {
         title
         source
+    }
+    class Export {
+        format
+        scale
+        padding
+        includesBackground
+        createdOn
     }
 
     Drawing "1 owner" --> "0..* elements" Element : contains
@@ -42,3 +51,5 @@ classDiagram
     Element "0..* members" --> "0..1 group" Group : belongs to
     Element "0..* placedElements" --> "0..1 frame" Frame : organized within
     Library "0..* libraries" --> "0..* drawings" Drawing : supplies templates to
+    Drawing "1 source" --> "0..* exports" Export : produces
+    Collaborator "1 requestedBy" --> "0..* requestedExports" Export : requests

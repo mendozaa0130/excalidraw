@@ -1,0 +1,19 @@
+%% SSD: Draw a Diagram
+%% Primary actor: Drawer. System: single black box (:ExcalidrawSystem).
+%% Events are named as system operations with parameters, not UI actions.
+%% The dragged shape is a draft until commitElement finalizes it into the
+%% Drawing, so the domain Element instance is created at commit, not at start.
+
+sequenceDiagram
+    actor Drawer
+    participant S as :ExcalidrawSystem
+
+    Drawer->>S: selectTool(category)
+    Drawer->>S: startElement(category, x, y)
+    S-->>Drawer: draftId
+    loop while dragging
+        Drawer->>S: resizeElement(draftId, width, height)
+        S-->>Drawer: bounds
+    end
+    Drawer->>S: commitElement(draftId, category, x, y, width, height)
+    S-->>Drawer: elementId

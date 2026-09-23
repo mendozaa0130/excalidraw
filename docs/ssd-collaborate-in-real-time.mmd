@@ -1,0 +1,18 @@
+%% SSD: Collaborate in Real Time
+%% Primary actor: Drawer (shown as two instances — host and joiner — since the
+%% use case has a host who starts the session and a joiner who enters it later).
+%% System: single black box (:ExcalidrawSystem).
+
+sequenceDiagram
+    actor Host as Drawer (host)
+    actor Joiner as Drawer (joiner)
+    participant S as :ExcalidrawSystem
+
+    Host->>S: startCollaboration(drawingId)
+    S-->>Host: collaborationLink
+    Joiner->>S: joinCollaboration(collaborationLink)
+    S-->>Joiner: scene
+    loop on each edit
+        Host->>S: updateElement(elementId, changes)
+        S-->>Joiner: elementUpdate
+    end
