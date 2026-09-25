@@ -55,6 +55,7 @@ exports[`exportToSvg > with default arguments 1`] = `
   "exportScale": 1,
   "exportWithDarkMode": false,
   "fileHandle": null,
+  "fontTopPicks": null,
   "frameRendering": {
     "clip": true,
     "enabled": true,
@@ -67,6 +68,7 @@ exports[`exportToSvg > with default arguments 1`] = `
   "gridStep": 5,
   "hoveredArrowTextAnchor": null,
   "hoveredElementIds": {},
+  "inputDevice": "auto",
   "isBindingEnabled": true,
   "isCropping": false,
   "isLoading": false,
@@ -106,6 +108,7 @@ exports[`exportToSvg > with default arguments 1`] = `
   "selectedLinearElement": null,
   "selectionElement": null,
   "shouldCacheIgnoreZoom": false,
+  "showHints": true,
   "showHyperlinkPopup": false,
   "showWelcomeScreen": false,
   "snapLines": [],
