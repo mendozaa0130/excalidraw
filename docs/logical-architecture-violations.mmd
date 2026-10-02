@@ -1,0 +1,36 @@
+%% Excalidraw logical architecture: layering violations
+%% Companion to logical-architecture.mmd. Shows only the dependencies that point
+%% UP a layer or form a cycle. Arrow = "imports from". Grey arrows are the normal
+%% downward dependency that completes each cycle, shown for context.
+
+flowchart BT
+    subgraph L1["Layer 1 · Application / integration"]
+        UEXP["@excalidraw/utils<br/>src/export.ts"]
+    end
+    subgraph L2["Layer 2 · Editor / UI"]
+        ED["packages/excalidraw<br/>(types.ts, components/App.tsx,<br/>appState, data/, scene/export)"]
+    end
+    subgraph L3["Layer 3 · Domain"]
+        EL["packages/element<br/>(store.ts, bounds.ts, shape.ts, …)"]
+        USH["@excalidraw/utils<br/>src/shape.ts"]
+    end
+    subgraph L4["Layer 4 · Foundation"]
+        CM["packages/common<br/>(constants.ts, utils.ts, emitter.ts)"]
+        MA["packages/math<br/>(range.ts, …)"]
+    end
+
+    %% Upward dependencies (violations)
+    ED -.->|"① exportToCanvas / exportToSvg<br/>runtime import"| UEXP
+    EL -.->|"② 38 × import type<br/>AppState, App"| ED
+    CM -.->|"③ import type<br/>AppState, AppProps"| ED
+    %% Same-layer runtime cycles
+    USH -.->|"④ getElementAbsoluteCoords"| EL
+    MA -.->|"⑤ toBrandedType"| CM
+
+    %% The normal downward edge that closes each cycle (context)
+    UEXP -->|"appState, data/json,<br/>data/restore, scene/export"| ED
+    EL -->|"getCurvePathOps"| USH
+    CM -->|"clamp, average"| MA
+
+    linkStyle 0,1,2,3,4 stroke:#d32f2f,stroke-width:2px,color:#d32f2f
+    linkStyle 5,6,7 stroke:#9e9e9e,color:#616161

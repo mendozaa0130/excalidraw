@@ -1,0 +1,67 @@
+%% Interaction diagram: undo (Ctrl+Z / Cmd+Z)
+%% Second operation, not from an SSD: undoing the last change.
+%% App:            packages/excalidraw/components/App.tsx (onKeyDown, syncActionResult)
+%% ActionManager:  packages/excalidraw/actions/manager.tsx
+%% undo : Action   object implementing the Action interface (packages/excalidraw/actions/types.ts),
+%%                 built by createUndoAction() in packages/excalidraw/actions/actionHistory.tsx
+%% History, HistoryDelta: packages/excalidraw/history.ts
+%% Store:          packages/element/src/store.ts
+%% Scene:          packages/element/src/Scene.ts
+
+sequenceDiagram
+    actor Drawer
+    participant App as app : App
+    participant AM as actionManager : ActionManager
+    participant Undo as undo : Action
+    participant Hist as history : History
+    participant HD as entry : HistoryDelta
+    participant Store as store : Store
+    participant Scene as scene : Scene
+
+    Drawer->>+App: keydown Ctrl+Z
+    App->>+AM: handleKeyDown(event)
+    loop each registered Action, sorted by keyPriority
+        AM->>Undo: keyTest(event, appState, elements, app)
+        Undo-->>AM: true (only for undo)
+    end
+
+    alt exactly one Action matched
+        AM->>+Undo: perform(elements, appState, null, app)
+        alt no gesture in progress (no newElement, multiElement,<br/>editingTextElement, selectionElement, ...)
+            Undo->>+Hist: undo(arrayToMap(elements), appState)
+            Hist->>Hist: entry = pop(undoStack)
+            alt undoStack was empty
+                Hist-->>Undo: undefined
+                Undo-->>AM: { captureUpdate: EVENTUALLY }
+            else entry found
+                loop until an entry produces a visible change, or the stack runs out
+                    Hist->>HD: applyTo(nextElements, nextAppState, prevSnapshot)
+                    HD-->>Hist: [nextElements, nextAppState, containsVisibleChange]
+                    opt applied delta is not empty
+                        Hist->>Store: scheduleMicroAction({ IMMEDIATELY, change, delta })
+                    end
+                    Hist->>Hist: push(redoStack, HistoryDelta.inverse(entry))
+                end
+                Hist->>Hist: onHistoryChangedEmitter.trigger(HistoryChangedEvent)
+                Hist-->>-Undo: [nextElements, nextAppState]
+                Undo-->>AM: { elements, appState, captureUpdate: NEVER }
+            end
+        else gesture in progress
+            Undo-->>-AM: { captureUpdate: EVENTUALLY }
+        end
+
+        AM->>App: syncActionResult(actionResult)
+        App->>Store: scheduleAction(actionResult.captureUpdate)
+        opt actionResult.elements
+            App->>Scene: replaceAllElements(elements)
+            Scene->>App: triggerRender() (onUpdate callback)
+        end
+        opt actionResult.appState
+            App->>App: setState({ ...prevState, ...actionResult.appState })
+        end
+        AM-->>App: true
+        Note over App,Store: Next componentDidUpdate → store.commit() flushes the micro action.<br/>History.record() ignores it because the delta is a HistoryDelta.
+    else no Action, or more than one, matched
+        AM-->>-App: false
+    end
+    App-->>-Drawer: canvas shows the previous state

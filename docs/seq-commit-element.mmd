@@ -1,0 +1,69 @@
+%% Interaction diagram: commitElement (expands the "Draw a Diagram" SSD)
+%% The SSD showed Drawer ->> :ExcalidrawSystem : commitElement(draftId, category, x, y, width, height).
+%% In code, that system event is the pointerup that ends the drag. The draft element
+%% was already inserted into the Scene on pointerdown (this.state.newElement), so
+%% "commit" means: discard it if it is too small, otherwise normalize it, select it,
+%% and record it in the undo history.
+%% App:     packages/excalidraw/components/App.tsx (onPointerUpFromPointerDownHandler, componentDidUpdate)
+%% Scene:   packages/element/src/Scene.ts
+%% Store, StoreSnapshot, StoreChange, StoreDelta: packages/element/src/store.ts
+%% Emitter: packages/common/src/emitter.ts
+%% History: packages/excalidraw/history.ts
+
+sequenceDiagram
+    actor Drawer
+    participant App as app : App
+    participant Scene as scene : Scene
+    participant Store as store : Store
+    participant Snap as snapshot : StoreSnapshot
+    participant Change as StoreChange
+    participant Delta as StoreDelta
+    participant Em as onDurableIncrementEmitter : Emitter
+    participant Hist as history : History
+
+    Drawer->>+App: pointerup [SSD: commitElement(draftId, category, x, y, width, height)]
+    Note over App: onPointerUpFromPointerDownHandler(pointerDownState)<br/>newElement = this.state.newElement (the draft)
+    App->>App: isInvisiblySmallElement(newElement)
+
+    alt draft is invisibly small (a click, not a drag)
+        App->>App: updateScene({ elements: all except newElement,<br/>captureUpdate: NEVER })
+        App-->>Drawer: draft discarded, nothing added to history
+    else draft has a real size
+        App->>Scene: mutateElement(newElement, getNormalizedDimensions(newElement),<br/>{ informMutation: false })
+        Scene-->>App: newElement
+        App->>Scene: triggerUpdate()
+        loop each callback registered via onUpdate()
+            Scene->>App: triggerRender()
+        end
+
+        opt tool is not locked
+            App->>App: setState({ selectedElementIds: { ..., [newElement.id]: true } })
+        end
+        App->>Store: scheduleCapture()
+        Store->>Store: scheduleAction(IMMEDIATELY)
+        opt tool is not locked
+            App->>App: setState({ newElement: null, activeTool: selection })
+        end
+
+        Note over App: React re-renders, then componentDidUpdate()
+        App->>Store: commit(elementsMap, this.state)
+        Store->>Store: getScheduledMacroAction() → IMMEDIATELY
+        Store->>Snap: maybeClone(IMMEDIATELY, elements, appState)
+        Snap-->>Store: nextSnapshot
+        Store->>Change: create(prevSnapshot, nextSnapshot)
+        Change-->>Store: storeChange
+        Store->>Delta: calculate(prevSnapshot, nextSnapshot)
+        Delta-->>Store: storeDelta
+
+        opt storeDelta is not empty
+            Store->>Em: trigger(new DurableIncrement(storeChange, storeDelta))
+            Note right of Em: listener registered in App.componentDidMount
+            Em->>Hist: record(increment.delta)
+            Hist->>Hist: undoStack.push(HistoryDelta.inverse(delta))<br/>redoStack.length = 0
+            Hist-->>Em:
+            Em-->>Store:
+        end
+        Store->>Store: snapshot = nextSnapshot
+        Store-->>App:
+        App-->>-Drawer: canvas shows newElement, selected [SSD: elementId]
+    end

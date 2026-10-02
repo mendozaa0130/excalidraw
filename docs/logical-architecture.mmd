@@ -1,0 +1,74 @@
+%% Excalidraw logical architecture
+%% Code organization only: layers, packages/directories, and import dependencies.
+%% Says nothing about servers, browsers, or deployment.
+%% Solid arrows = allowed downward dependency (label = number of import statements in non-test code).
+%% Dependencies that break the layering are drawn separately in logical-architecture-violations.mmd.
+
+flowchart TB
+    subgraph L1["Layer 1 · Application / integration"]
+        direction LR
+        subgraph APP["excalidraw-app/"]
+            direction LR
+            a1["App.tsx"]
+            a2["collab/"]
+            a3["data/"]
+            a4["share/"]
+            a5["components/"]
+        end
+        subgraph UEXP["@excalidraw/utils · src/export.ts"]
+            u1["exportToCanvas<br/>exportToSvg<br/>exportToBlob"]
+        end
+    end
+
+    subgraph L2["Layer 2 · Editor / UI — packages/excalidraw (@excalidraw/excalidraw)"]
+        direction LR
+        e1["components/<br/>(App.tsx)"]
+        e2["actions/<br/>(manager.tsx)"]
+        e3["renderer/"]
+        e4["scene/"]
+        e5["data/"]
+        e6["hooks/"]
+        e7["history.ts"]
+        e8["i18n.ts + locales/"]
+    end
+
+    subgraph L3["Layer 3 · Domain — scene model"]
+        direction LR
+        subgraph EL["packages/element (@excalidraw/element)"]
+            direction LR
+            d1["types.ts"]
+            d2["Scene.ts"]
+            d3["store.ts"]
+            d4["newElement.ts<br/>mutateElement.ts"]
+            d5["binding.ts<br/>collision.ts<br/>bounds.ts"]
+            d6["shape.ts<br/>renderElement.ts"]
+        end
+        subgraph USH["@excalidraw/utils · src/shape.ts"]
+            s1["getCurvePathOps<br/>getPolygonShape …"]
+        end
+    end
+
+    subgraph L4["Layer 4 · Foundation"]
+        direction LR
+        subgraph CM["packages/common"]
+            c1["constants.ts<br/>utils.ts<br/>emitter.ts<br/>keys.ts"]
+        end
+        subgraph MA["packages/math"]
+            m1["point.ts<br/>vector.ts<br/>curve.ts<br/>segment.ts"]
+        end
+        FI["packages/fractional-indexing"]
+        LP["packages/laser-pointer"]
+    end
+
+    %% Downward dependencies (allowed)
+    APP -->|"109"| L2
+    APP -->|"32"| EL
+    APP -->|"26"| L4
+    UEXP -->|"appState, data/json,<br/>data/restore, scene/export"| L2
+    L2 -->|"456"| EL
+    L2 -->|"283 (common, math,<br/>laser-pointer)"| L4
+    EL -->|"3 · getCurvePathOps"| USH
+    EL -->|"120 (common, math,<br/>fractional-indexing)"| L4
+
+    %% Invisible links that pin the layer order top to bottom
+    L1 ~~~ L2 ~~~ L3 ~~~ L4
