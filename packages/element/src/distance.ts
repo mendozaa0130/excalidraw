@@ -16,6 +16,7 @@ import {
 } from "./utils";
 
 import { elementCenterPoint } from "./bounds";
+import { getElementGeometry } from "./elementGeometry";
 
 import type {
   ElementsMap,
@@ -31,29 +32,7 @@ export const distanceToElement = (
   element: ExcalidrawElement,
   elementsMap: ElementsMap,
   p: GlobalPoint,
-): number => {
-  switch (element.type) {
-    case "selection":
-    case "rectangle":
-    case "stickynote":
-    case "image":
-    case "text":
-    case "iframe":
-    case "embeddable":
-    case "frame":
-    case "magicframe":
-      return distanceToRectanguloidElement(element, elementsMap, p);
-    case "diamond":
-      return distanceToDiamondElement(element, elementsMap, p);
-    case "ellipse":
-      return distanceToEllipseElement(element, elementsMap, p);
-    case "line":
-    case "arrow":
-      return distanceToLinearOrFreeDraElement(element, elementsMap, p);
-    case "freedraw":
-      return distanceToFreeDrawElement(element, elementsMap, p);
-  }
-};
+): number => getElementGeometry(element).distanceTo(element, elementsMap, p);
 
 /**
  * Returns the distance of a point and the provided rectangular-shaped element,
@@ -63,7 +42,7 @@ export const distanceToElement = (
  * @param p The point to consider
  * @returns The eucledian distance to the outline of the rectanguloid element
  */
-const distanceToRectanguloidElement = (
+export const distanceToRectanguloidElement = (
   element: ExcalidrawRectanguloidElement,
   elementsMap: ElementsMap,
   p: GlobalPoint,
@@ -90,7 +69,7 @@ const distanceToRectanguloidElement = (
  * @param p The point to consider
  * @returns The eucledian distance to the outline of the diamond
  */
-const distanceToDiamondElement = (
+export const distanceToDiamondElement = (
   element: ExcalidrawDiamondElement,
   elementsMap: ElementsMap,
   p: GlobalPoint,
@@ -117,7 +96,7 @@ const distanceToDiamondElement = (
  * @param p The point to consider
  * @returns The eucledian distance to the outline of the ellipse
  */
-const distanceToEllipseElement = (
+export const distanceToEllipseElement = (
   element: ExcalidrawEllipseElement,
   elementsMap: ElementsMap,
   p: GlobalPoint,
@@ -130,7 +109,7 @@ const distanceToEllipseElement = (
   );
 };
 
-const distanceToLinearOrFreeDraElement = (
+export const distanceToLinearOrFreeDraElement = (
   element: ExcalidrawLinearElement | ExcalidrawFreeDrawElement,
   elementsMap: ElementsMap,
   p: GlobalPoint,
@@ -153,7 +132,7 @@ const distanceToLinearOrFreeDraElement = (
  * @returns 0 if the point is within the inked area, otherwise the euclidean
  * distance to the stroke outline
  */
-const distanceToFreeDrawElement = (
+export const distanceToFreeDrawElement = (
   element: ExcalidrawFreeDrawElement,
   elementsMap: ElementsMap,
   p: GlobalPoint,

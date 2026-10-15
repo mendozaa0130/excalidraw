@@ -60,6 +60,7 @@ import { getBoundTextElement } from "./textElement";
 import { LinearElementEditor } from "./linearElementEditor";
 
 import { distanceToElement } from "./distance";
+import { getElementGeometry } from "./elementGeometry";
 
 import { maxBindingDistance_simple } from "./binding";
 
@@ -507,48 +508,13 @@ export const intersectElementWithLineSegment = (
   }
 
   // Do the actual intersection test against the element's shape
-  switch (element.type) {
-    case "rectangle":
-    case "stickynote":
-    case "image":
-    case "text":
-    case "iframe":
-    case "embeddable":
-    case "frame":
-    case "selection":
-    case "magicframe":
-      return intersectRectanguloidWithLineSegment(
-        element,
-        elementsMap,
-        line,
-        offset,
-        onlyFirst,
-      );
-    case "diamond":
-      return intersectDiamondWithLineSegment(
-        element,
-        elementsMap,
-        line,
-        offset,
-        onlyFirst,
-      );
-    case "ellipse":
-      return intersectEllipseWithLineSegment(
-        element,
-        elementsMap,
-        line,
-        offset,
-      );
-    case "line":
-    case "freedraw":
-    case "arrow":
-      return intersectLinearOrFreeDrawWithLineSegment(
-        element,
-        line,
-        elementsMap,
-        onlyFirst,
-      );
-  }
+  return getElementGeometry(element).intersectLineSegment(
+    element,
+    elementsMap,
+    line,
+    offset,
+    onlyFirst,
+  );
 };
 
 const CURVE_BOUNDS_EPSILON = 1e-6;
@@ -617,7 +583,7 @@ const lineIntersections = (
   return intersections;
 };
 
-const intersectLinearOrFreeDrawWithLineSegment = (
+export const intersectLinearOrFreeDrawWithLineSegment = (
   element: ExcalidrawLinearElement | ExcalidrawFreeDrawElement,
   segment: LineSegment<GlobalPoint>,
   elementsMap: ElementsMap,
@@ -672,7 +638,7 @@ const intersectLinearOrFreeDrawWithLineSegment = (
   return intersections;
 };
 
-const intersectRectanguloidWithLineSegment = (
+export const intersectRectanguloidWithLineSegment = (
   element: ExcalidrawRectanguloidElement,
   elementsMap: ElementsMap,
   segment: LineSegment<GlobalPoint>,
@@ -731,7 +697,7 @@ const intersectRectanguloidWithLineSegment = (
  * @param b
  * @returns
  */
-const intersectDiamondWithLineSegment = (
+export const intersectDiamondWithLineSegment = (
   element: ExcalidrawDiamondElement,
   elementsMap: ElementsMap,
   l: LineSegment<GlobalPoint>,
@@ -781,7 +747,7 @@ const intersectDiamondWithLineSegment = (
  * @param b
  * @returns
  */
-const intersectEllipseWithLineSegment = (
+export const intersectEllipseWithLineSegment = (
   element: ExcalidrawEllipseElement,
   elementsMap: ElementsMap,
   l: LineSegment<GlobalPoint>,
