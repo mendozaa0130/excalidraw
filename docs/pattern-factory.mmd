@@ -1,0 +1,86 @@
+%% Factory (Simple Factory / factory functions) — element creation
+%% Factory:   packages/element/src/newElement.ts — 11 exported new*Element functions, all built on _newElementBase (:87)
+%% Products:  ExcalidrawElement and its subtypes (packages/element/src/types.ts) — TypeScript type aliases, not classes
+%% Clients:   75 call sites in 18 non-test files, e.g.
+%%            App (components/App.tsx:5075, :9948, :10118, :10293, :10320)
+%%            convertToExcalidrawElements (packages/element/src/transform.ts:572, switch at :607-705)
+%% Note: GoF "Factory Method" defers creation to subclasses; here a module of functions plays the creator role.
+
+classDiagram
+    direction LR
+
+    class newElement_ts {
+        <<module · factory>>
+        -_newElementBase~T~(type: T.type, opts: ElementConstructorOpts) ExcalidrawGenericElement
+        +newElement(opts: type + ElementConstructorOpts) NonDeleted~ExcalidrawGenericElement~
+        +newTextElement(opts: text, fontSize?, fontFamily?, … + ElementConstructorOpts) NonDeleted~ExcalidrawTextElement~
+        +newLinearElement(opts: type, points? + ElementConstructorOpts) NonDeleted~ExcalidrawLinearElement~
+        +newArrowElement~T~(opts: type, elbowed?: T, points?, … + ElementConstructorOpts) NonDeleted~ExcalidrawArrowElement~
+        +newImageElement(opts: type, fileId?, status?, scale?, crop? + ElementConstructorOpts) NonDeleted~ExcalidrawImageElement~
+        +newFreeDrawElement(opts) NonDeleted~ExcalidrawFreeDrawElement~
+        +newFrameElement(opts) NonDeleted~ExcalidrawFrameElement~
+        +newStickyNoteElement(opts) NonDeleted~ExcalidrawStickyNoteElement~
+    }
+
+    class ExcalidrawElement {
+        <<type>>
+        +id: string
+        +type: string
+        +x: number
+        +y: number
+        +seed: number
+        +version: number
+        +versionNonce: number
+        +index: FractionalIndex | null
+        +isDeleted: boolean
+        +updated: number
+    }
+    class ExcalidrawTextElement {
+        <<type>>
+        +text: string
+        +fontSize: number
+        +fontFamily: FontFamilyValues
+        +containerId: string | null
+    }
+    class ExcalidrawLinearElement {
+        <<type>>
+        +points: LocalPoint[]
+        +startBinding: Binding | null
+        +endBinding: Binding | null
+    }
+    class ExcalidrawArrowElement {
+        <<type>>
+        +elbowed: boolean
+        +startArrowhead: Arrowhead | null
+        +endArrowhead: Arrowhead | null
+    }
+    class ExcalidrawImageElement {
+        <<type>>
+        +fileId: FileId | null
+        +status: pending | saved | error
+    }
+
+    class App {
+        +handleCanvasPointerDown(event: PointerEvent) void
+    }
+    class convertToExcalidrawElements {
+        <<function · public API>>
+        +convertToExcalidrawElements(skeletons: ExcalidrawElementSkeleton[]) ExcalidrawElement[]
+    }
+    class textMeasurements {
+        <<module>>
+        +measureText(text: string, font: FontString, lineHeight: number) width, height
+    }
+
+    ExcalidrawElement <|-- ExcalidrawTextElement
+    ExcalidrawElement <|-- ExcalidrawLinearElement
+    ExcalidrawLinearElement <|-- ExcalidrawArrowElement
+    ExcalidrawElement <|-- ExcalidrawImageElement
+
+    newElement_ts ..> ExcalidrawElement : «create» id, seed, version, nonce
+    newElement_ts ..> ExcalidrawTextElement : «create»
+    newElement_ts ..> ExcalidrawArrowElement : «create»
+    newElement_ts ..> ExcalidrawImageElement : «create»
+    newElement_ts ..> textMeasurements : newTextElement sizes text
+    App ..> newElement_ts : drawing tools
+    convertToExcalidrawElements ..> newElement_ts : switch on skeleton.type

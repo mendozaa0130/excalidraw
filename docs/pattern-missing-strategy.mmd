@@ -1,0 +1,74 @@
+%% PROPOSED design (not in the code today): Strategy per element type
+%% Replaces the type switches in distance.ts:35, collision.ts:510, shape.ts:228/786/1091,
+%% renderElement.ts:103/437/1021, staticSvgScene.ts:152, restore.ts:530, transform.ts:595
+%% Geometry and canvas-drawing strategies live in packages/element (where those switches are today);
+%% SVG strategies live in packages/excalidraw (where staticSvgScene.ts is), so no new upward imports.
+
+classDiagram
+    direction LR
+
+    class ElementGeometryStrategy~T~ {
+        <<interface>>
+        +distanceTo(element: T, elementsMap: ElementsMap, p: GlobalPoint) number
+        +intersectLineSegment(element: T, elementsMap: ElementsMap, line: LineSegment, offset: number, onlyFirst: boolean) GlobalPoint[]
+        +getElementShape(element: T, elementsMap: ElementsMap) GeometricShape
+    }
+
+    class ElementCanvasStrategy~T~ {
+        <<interface>>
+        +getCanvasPadding(element: T) number
+        +drawOnCanvas(element: T, rc: RoughCanvas, context: CanvasRenderingContext2D, renderConfig: StaticCanvasRenderConfig) void
+    }
+
+    class ElementSvgStrategy~T~ {
+        <<interface>>
+        +renderToSvg(element: T, elementsMap: RenderableElementsMap, rsvg: RoughSVG, svgRoot: SVGElement, files: BinaryFiles, renderConfig: SVGRenderConfig) void
+    }
+
+    class rectanguloidGeometry {
+        <<object>>
+        +distanceTo(element, elementsMap, p) number
+        +intersectLineSegment(element, elementsMap, line, offset, onlyFirst) GlobalPoint[]
+        +getElementShape(element, elementsMap) GeometricShape
+    }
+    class diamondGeometry {
+        <<object>>
+    }
+    class linearGeometry {
+        <<object>>
+        +distanceTo(element, elementsMap, p) number
+    }
+    class stickyNoteCanvas {
+        <<object>>
+        +getCanvasPadding(element) number
+        +drawOnCanvas(element, rc, context, renderConfig) void
+    }
+    class stickyNoteSvg {
+        <<object>>
+        +renderToSvg(element, elementsMap, rsvg, svgRoot, files, renderConfig) void
+    }
+
+    class elementTypes {
+        <<registry · packages/element>>
+        +geometry: Record~ExcalidrawElementType, ElementGeometryStrategy~
+        +canvas: Record~ExcalidrawElementType, ElementCanvasStrategy~
+        +distanceToElement(element, elementsMap, p) number
+        +intersectElementWithLineSegment(element, elementsMap, line, offset, onlyFirst) GlobalPoint[]
+        +drawElementOnCanvas(element, rc, context, renderConfig) void
+    }
+
+    class svgElementTypes {
+        <<registry · packages/excalidraw>>
+        +svg: Record~ExcalidrawElementType, ElementSvgStrategy~
+        +renderElementToSvg(element, elementsMap, rsvg, svgRoot, files, renderConfig) void
+    }
+
+    ElementGeometryStrategy <|.. rectanguloidGeometry : rectangle, stickynote, image, text, frame, …
+    ElementGeometryStrategy <|.. diamondGeometry
+    ElementGeometryStrategy <|.. linearGeometry : line, arrow
+    ElementCanvasStrategy <|.. stickyNoteCanvas
+    ElementSvgStrategy <|.. stickyNoteSvg
+    elementTypes o--> "14" ElementGeometryStrategy : one entry per type
+    elementTypes o--> "14" ElementCanvasStrategy : one entry per type
+    svgElementTypes o--> "14" ElementSvgStrategy : one entry per type
+    svgElementTypes ..> elementTypes : imports (downward)

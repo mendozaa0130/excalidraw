@@ -1,0 +1,59 @@
+%% GoF Strategy — text width measurement
+%% Strategy:          TextMetricsProvider          packages/element/src/textMeasurements.ts:117
+%% ConcreteStrategy:  CanvasTextMetricsProvider     textMeasurements.ts:121 (default, created lazily at :153-155)
+%%                    any host-supplied provider    installed via setCustomTextMetricsProvider (:113),
+%%                                                  re-exported publicly from packages/excalidraw/index.tsx:516
+%% Context:           the textMeasurements module   holds the current strategy in a module-level variable (:106)
+%% Clients:           wrapText (textWrapping.ts:462, :543, :662, :679), measureText, newTextElement,
+%%                    textWysiwyg (packages/excalidraw/wysiwyg/textWysiwyg.tsx:519, :643)
+
+classDiagram
+    direction LR
+
+    class TextMetricsProvider {
+        <<interface>>
+        +getLineWidth(text: string, fontString: FontString) number
+    }
+
+    class CanvasTextMetricsProvider {
+        -canvas: HTMLCanvasElement
+        +constructor()
+        +getLineWidth(text: string, fontString: FontString) number
+    }
+
+    class HostTextMetricsProvider {
+        <<supplied by embedding app>>
+        +getLineWidth(text: string, fontString: FontString) number
+    }
+
+    class textMeasurements {
+        <<module · context>>
+        -textMetricsProvider: TextMetricsProvider | undefined
+        +setCustomTextMetricsProvider(provider: TextMetricsProvider) void
+        +getLineWidth(text: string, font: FontString) number
+        +getTextWidth(text: string, font: FontString) number
+        +measureText(text: string, font: FontString, lineHeight: number) width, height
+    }
+
+    class textWrapping {
+        <<module>>
+        +wrapText(text: string, font: FontString, maxWidth: number) string
+    }
+
+    class newElement_ts {
+        <<module>>
+        +newTextElement(opts) NonDeleted~ExcalidrawTextElement~
+    }
+
+    class textWysiwyg {
+        <<module>>
+        +textWysiwyg(params) SubmitHandler
+    }
+
+    TextMetricsProvider <|.. CanvasTextMetricsProvider
+    TextMetricsProvider <|.. HostTextMetricsProvider
+    textMeasurements o--> "0..1" TextMetricsProvider : current strategy
+    textMeasurements ..> CanvasTextMetricsProvider : «create» default if none set
+    textWrapping ..> textMeasurements : getLineWidth
+    newElement_ts ..> textMeasurements : measureText
+    textWysiwyg ..> textMeasurements : getLineWidth / getTextWidth

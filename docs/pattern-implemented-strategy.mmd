@@ -1,0 +1,67 @@
+%% IMPLEMENTED (A8): Strategy for element geometry
+%% Strategy interface + registry:  packages/element/src/elementGeometry.ts
+%% Context functions (public API unchanged):
+%%   distanceToElement                 packages/element/src/distance.ts
+%%   intersectElementWithLineSegment   packages/element/src/collision.ts
+%% Concrete strategies delegate to the per-shape functions that already existed in distance.ts / collision.ts.
+
+classDiagram
+    direction LR
+
+    class ElementGeometryStrategy~T~ {
+        <<interface>>
+        +distanceTo(element: T, elementsMap: ElementsMap, p: GlobalPoint) number
+        +intersectLineSegment(element: T, elementsMap: ElementsMap, segment: LineSegment~GlobalPoint~, offset: number, onlyFirst: boolean) GlobalPoint[]
+    }
+
+    class rectanguloidGeometry {
+        <<const · ElementGeometryStrategy~ExcalidrawRectanguloidElement~>>
+    }
+    class diamondGeometry {
+        <<const · ElementGeometryStrategy~ExcalidrawDiamondElement~>>
+    }
+    class ellipseGeometry {
+        <<const · ElementGeometryStrategy~ExcalidrawEllipseElement~>>
+    }
+    class linearGeometry {
+        <<const · ElementGeometryStrategy~ExcalidrawLinearElement~>>
+    }
+    class freeDrawGeometry {
+        <<const · ElementGeometryStrategy~ExcalidrawFreeDrawElement~>>
+    }
+
+    class elementGeometry_ts {
+        <<module>>
+        -elementGeometry: K in ExcalidrawElementType → ElementGeometryStrategy
+        +getElementGeometry~T~(element: T) ElementGeometryStrategy~T~
+    }
+
+    class distance_ts {
+        <<module · context>>
+        +distanceToElement(element, elementsMap, p) number
+        +distanceToRectanguloidElement(…) number
+        +distanceToDiamondElement(…) number
+        +distanceToEllipseElement(…) number
+        +distanceToLinearOrFreeDraElement(…) number
+        +distanceToFreeDrawElement(…) number
+    }
+
+    class collision_ts {
+        <<module · context>>
+        +intersectElementWithLineSegment(element, elementsMap, line, offset, onlyFirst) GlobalPoint[]
+        +intersectRectanguloidWithLineSegment(…) GlobalPoint[]
+        +intersectDiamondWithLineSegment(…) GlobalPoint[]
+        +intersectEllipseWithLineSegment(…) GlobalPoint[]
+        +intersectLinearOrFreeDrawWithLineSegment(…) GlobalPoint[]
+    }
+
+    ElementGeometryStrategy <|.. rectanguloidGeometry : selection, rectangle, stickynote, image, text, iframe, embeddable, frame, magicframe
+    ElementGeometryStrategy <|.. diamondGeometry : diamond
+    ElementGeometryStrategy <|.. ellipseGeometry : ellipse
+    ElementGeometryStrategy <|.. linearGeometry : line, arrow
+    ElementGeometryStrategy <|.. freeDrawGeometry : freedraw
+    elementGeometry_ts o--> "14 entries" ElementGeometryStrategy
+    distance_ts ..> elementGeometry_ts : getElementGeometry(element).distanceTo
+    collision_ts ..> elementGeometry_ts : getElementGeometry(element).intersectLineSegment
+    rectanguloidGeometry ..> distance_ts : delegates
+    rectanguloidGeometry ..> collision_ts : delegates

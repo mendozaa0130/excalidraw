@@ -1,0 +1,93 @@
+%% GoF Observer — Store increments feeding History (and the host app)
+%% Generic subject:  Emitter<T>        packages/common/src/emitter.ts:5
+%% ConcreteSubject:  Store             packages/element/src/store.ts:78 (triggers at :243-244, :269)
+%%                   History           packages/excalidraw/history.ts:90 (is also a subject: onHistoryChangedEmitter)
+%% Observers:        History.record    subscribed in App.tsx:3854
+%%                   props.onIncrement subscribed in App.tsx:3860 (host apps)
+%%                   undo/redo PanelComponent via useEmitter (actions/actionHistory.tsx:82, :122)
+%% Event objects:    DurableIncrement / EphemeralIncrement (store.ts:454-496), HistoryChangedEvent (history.ts:83)
+
+classDiagram
+    direction TB
+
+    class Emitter~T~ {
+        +subscribers: Subscriber~T~[]
+        +on(...handlers: Subscriber~T~[]) UnsubscribeCallback
+        +once(...handlers: Subscriber~T~[]) UnsubscribeCallback
+        +off(...handlers: Subscriber~T~[]) void
+        +trigger(...payload: T) Emitter~T~
+        +clear() void
+    }
+
+    class Store {
+        +onDurableIncrementEmitter: Emitter~DurableIncrement~
+        +onStoreIncrementEmitter: Emitter~DurableIncrement | EphemeralIncrement~
+        -_snapshot: StoreSnapshot
+        -app: App
+        +scheduleAction(action: CaptureUpdateActionType) void
+        +scheduleMicroAction(params) void
+        +commit(elements: SceneElementsMap, appState: AppState) void
+        -emitDurableIncrement(snapshot, change?, delta?) void
+        -emitEphemeralIncrement(snapshot, change?) void
+    }
+
+    class StoreIncrement {
+        <<abstract>>
+        +change: StoreChange
+    }
+    class DurableIncrement {
+        +delta: StoreDelta
+    }
+    class EphemeralIncrement
+
+    class StoreDelta {
+        +elements: ElementsDelta
+        +appState: AppStateDelta
+        +isEmpty() boolean
+        +calculate(prev: StoreSnapshot, next: StoreSnapshot)$ StoreDelta
+        +inverse(delta: StoreDelta)$ StoreDelta
+    }
+    class HistoryDelta {
+        +applyTo(elements, appState, snapshot: StoreSnapshot) [SceneElementsMap, AppState, boolean]
+    }
+
+    class History {
+        +onHistoryChangedEmitter: Emitter~HistoryChangedEvent~
+        +undoStack: HistoryDelta[]
+        +redoStack: HistoryDelta[]
+        -store: Store
+        +record(delta: StoreDelta) void
+        +undo(elements: SceneElementsMap, appState: AppState) [SceneElementsMap, AppState]
+        +redo(elements: SceneElementsMap, appState: AppState) [SceneElementsMap, AppState]
+        -perform(elements, appState, pop, push) [SceneElementsMap, AppState]
+    }
+
+    class HistoryChangedEvent {
+        +isUndoStackEmpty: boolean
+        +isRedoStackEmpty: boolean
+    }
+
+    class App {
+        +store: Store
+        +history: History
+        +props: ExcalidrawProps
+        +componentDidMount() void
+    }
+
+    class useEmitter {
+        <<React hook>>
+        +useEmitter(emitter: Emitter~TEvent~, initialState: TEvent) TEvent
+    }
+
+    Store *--> "2" Emitter : owns
+    History *--> "1" Emitter : owns
+    StoreIncrement <|-- DurableIncrement
+    StoreIncrement <|-- EphemeralIncrement
+    StoreDelta <|-- HistoryDelta
+    Store ..> DurableIncrement : trigger(increment)
+    DurableIncrement --> StoreDelta : delta
+    History --> Store : schedules micro actions on undo/redo
+    History o--> "0..*" HistoryDelta : undo/redo stacks
+    History ..> HistoryChangedEvent : trigger(event)
+    App ..> Emitter : subscribes history.record
+    useEmitter ..> Emitter : subscribes setState
