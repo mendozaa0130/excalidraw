@@ -8,8 +8,6 @@ import {
   toIterable,
 } from "@excalidraw/common";
 
-import type App from "@excalidraw/excalidraw/components/App";
-
 import type { DTO, ValueOf } from "@excalidraw/common/utility-types";
 
 import type { AppState, ObservedAppState } from "@excalidraw/excalidraw/types";
@@ -96,7 +94,10 @@ export class Store {
     this._snapshot = snapshot;
   }
 
-  constructor(private readonly app: App) {}
+  constructor(
+    private readonly getElementsMapIncludingDeleted: () => SceneElementsMap,
+    private readonly getAppState: () => AppState,
+  ) {}
 
   public scheduleAction(action: CaptureUpdateActionType) {
     this.scheduledMacroActions.add(action);
@@ -145,8 +146,8 @@ export class Store {
       // also, we have to compare against the current state,
       // as comparing against the snapshot might include yet uncomitted changes (i.e. async freedraw / text / image, etc.)
       const currentSnapshot = StoreSnapshot.create(
-        this.app.scene.getElementsMapIncludingDeleted(),
-        this.app.state,
+        this.getElementsMapIncludingDeleted(),
+        this.getAppState(),
       );
 
       const scheduledSnapshot = currentSnapshot.maybeClone(

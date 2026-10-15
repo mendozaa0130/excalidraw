@@ -928,7 +928,10 @@ class App extends React.Component<AppProps, AppState> {
     this.renderer = new Renderer(this.scene);
     this.visibleElements = [];
 
-    this.store = new Store(this);
+    this.store = new Store(
+      () => this.scene.getElementsMapIncludingDeleted(),
+      () => this.state,
+    );
     this.history = new History(this.store);
 
     this.excalidrawContainerValue = {
