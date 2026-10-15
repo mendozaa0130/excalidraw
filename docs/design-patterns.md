@@ -53,7 +53,8 @@ classDiagram
         +onDurableIncrementEmitter: Emitter~DurableIncrement~
         +onStoreIncrementEmitter: Emitter~DurableIncrement | EphemeralIncrement~
         -_snapshot: StoreSnapshot
-        -app: App
+        -getElementsMapIncludingDeleted() SceneElementsMap
+        -getAppState() AppState
         +scheduleAction(action: CaptureUpdateActionType) void
         +scheduleMicroAction(params) void
         +commit(elements: SceneElementsMap, appState: AppState) void
@@ -868,3 +869,71 @@ To be accurate, these two particular switches were already checked by the compil
 ## Not done (next steps from Part 2)
 
 Nine of the 11 type switches from Part 2 are still in the code: the shape generators in `shape.ts`, the canvas renderer in `renderElement.ts`, the SVG renderer in `staticSvgScene.ts`, `restoreElement`, and `convertToExcalidrawElements`. The next step would add `getElementShape` to `ElementGeometryStrategy`, then add an `ElementCanvasStrategy` next to `renderElement.ts`. The likely `endArrowhead || endArrowhead` typo in `getCanvasPadding` is **not** fixed here, because it would change rendering behavior and should be a separate, tested change.
+
+
+---
+
+# Part 4: GRASP Refactoring — Low Coupling in `Store`
+
+**Commit:** `A8-GRASP: Refactor Store to apply Low Coupling` (separate from the Part 3 commit)
+
+**What moved and why.** `Store` (`packages/element/src/store.ts`) used to receive the entire `App` component, the 14,000-line editor class, but it used only two things from it, and one of those it reached *through* `App` to get (`this.app.scene.getElementsMapIncludingDeleted()`). The knowledge of where elements and state come from has moved out of `Store` and into its creator, `App`. `Store` now receives two getters, `getElementsMapIncludingDeleted` and `getAppState`, the same constructor style `ActionManager` already uses. As a result, the domain-layer `Store` no longer depends on the editor's `App` class at all. This removes the worst part of layering violation ② on the [Logical Architecture](Logical-Architecture#where-the-layering-breaks) page: `Store` making runtime calls into the `App` instance it was handed. The type-only `AppState` imports counted in ② remain. `Store` can also be created and tested with two plain functions, without a mounted editor.
+
+### Before
+
+```ts
+// packages/element/src/store.ts
+import type App from "@excalidraw/excalidraw/components/App";
+
+export class Store {
+  constructor(private readonly app: App) {}
+  // …
+  const currentSnapshot = StoreSnapshot.create(
+    this.app.scene.getElementsMapIncludingDeleted(),   // Store → App → Scene
+    this.app.state,
+  );
+}
+
+// packages/excalidraw/components/App.tsx
+this.store = new Store(this);
+```
+
+### After
+
+```ts
+// packages/element/src/store.ts — no import of App
+export class Store {
+  constructor(
+    private readonly getElementsMapIncludingDeleted: () => SceneElementsMap,
+    private readonly getAppState: () => AppState,
+  ) {}
+  // …
+  const currentSnapshot = StoreSnapshot.create(
+    this.getElementsMapIncludingDeleted(),
+    this.getAppState(),
+  );
+}
+
+// packages/excalidraw/components/App.tsx
+this.store = new Store(
+  () => this.scene.getElementsMapIncludingDeleted(),
+  () => this.state,
+);
+```
+
+### GRASP
+
+- **Violated before: Low Coupling.** `Store` was coupled to `App`, the largest and most frequently changed class in the codebase, and through it to `Scene`'s API. That is two dependencies `Store` didn't need, and one of them pointed up a layer.
+- **Applied now: Low Coupling.** `Store` depends only on two function types built from domain types (`SceneElementsMap`, `AppState`). `App`, which already owns both the scene and the state, is the **Information Expert** for where they come from, and that is where the knowledge now lives.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `tsc` | 0 errors |
+| `vitest --run` (no snapshot update) | 137 files, 2,268 tests passed, 0 failed |
+| `eslint --max-warnings=0`, `prettier --check` on both files | clean |
+| `vite build` of `excalidraw-app` | built successfully |
+| imports of `components/App` from `packages/element/src` | 1 before → **0** after |
+
+The Observer diagram in Part 1 has been updated to show `Store`'s new constructor dependencies.

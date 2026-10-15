@@ -23,7 +23,8 @@ classDiagram
         +onDurableIncrementEmitter: Emitter~DurableIncrement~
         +onStoreIncrementEmitter: Emitter~DurableIncrement | EphemeralIncrement~
         -_snapshot: StoreSnapshot
-        -app: App
+        -getElementsMapIncludingDeleted() SceneElementsMap
+        -getAppState() AppState
         +scheduleAction(action: CaptureUpdateActionType) void
         +scheduleMicroAction(params) void
         +commit(elements: SceneElementsMap, appState: AppState) void
