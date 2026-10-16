@@ -943,3 +943,9 @@ The Observer diagram in Part 1 has been updated to show `Store`'s new constructo
 # How GRASP and GoF Patterns Relate
 
 I think of GRASP and the Gang of Four patterns as two levels of the same design decision: GRASP tells you where a responsibility should go and why (give behavior to the class with the information, keep coupling low, use polymorphism when behavior changes by type, and protect the system from the parts most likely to change), and a GoF pattern is a tried-and-tested way to actually build that in code. My Excalidraw fork shows this pretty clearly. When sticky notes were added upstream, the commit needed 13 case "stickynote" lines across 9 files, which showed that the switch (element.type) statements in distance.ts and collision.ts were breaking Polymorphism and Protected Variations, since every new element type meant editing every place where geometry depended on type. Those principles told me what to fix: the question “how far is a point from this shape?” should belong to each element type, behind one stable interface. The Strategy pattern told me how: I made an ElementGeometryStrategy interface with one strategy object per type, stored in a type-checked table that distanceToElement and intersectElementWithLineSegment look up instead of switching. GRASP was also my test for success: the refactor only works if adding a new type means writing one new strategy without touching existing code. The connection goes the other way too. The Observer pattern already in the codebase, where the Store sends out changes through an Emitter that History listens to, is what gives Low Coupling between the domain and editor layers, and my Part 4 refactor builds on it by removing the Store → App dependency that the pattern alone hadn’t removed.
+
+---
+
+## AI Use
+
+See [`docs/ai-use-log-a8-design-patterns.md`](ai-use-log-a8-design-patterns.md) for what Claude Code did versus what I did on this assignment.
