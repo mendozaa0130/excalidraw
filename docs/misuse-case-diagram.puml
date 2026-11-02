@@ -1,0 +1,79 @@
+@startuml misuse-case-diagram
+' Excalidraw misuse case diagram — extends use-case-diagram.puml with attacker behaviour
+!pragma layout smetana
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam ArrowFontSize 11
+
+skinparam usecase {
+  BackgroundColor<<misuse>> Black
+  FontColor<<misuse>> White
+  BorderColor<<misuse>> Black
+  StereotypeFontColor<<misuse>> White
+  BackgroundColor<<control>> #DDF3E4
+  BorderColor<<control>> #1E7B3E
+}
+skinparam actor {
+  BackgroundColor<<attacker>> Black
+  BorderColor<<attacker>> Black
+}
+
+actor "Drawer\n(end user)" as Drawer
+actor "Collaboration Backend\n(WebSocket relay + Firestore)" as Backend
+actor "Maintainer\n(reviews Sentry crash reports)" as Maintainer
+
+rectangle "Excalidraw" {
+  usecase "Draw a Diagram" as UC1
+  usecase "Collaborate in Real Time" as UC2
+  usecase "Export a Drawing" as UC3
+
+  usecase "Steal Room Link" as MC1 <<misuse>>
+  usecase "Read Another User's Drawing" as MC2 <<misuse>>
+  usecase "Overwrite a Stored Scene" as MC3 <<misuse>>
+  usecase "Plant Malicious Link in a Scene" as MC4 <<misuse>>
+  usecase "Recover Source Scene\nfrom Exported Image" as MC5 <<misuse>>
+
+  usecase "Keep Room Key out of Requests\n(URL fragment, Sentry scrub)" as C1 <<control>>
+  usecase "Encrypt Scenes End-to-End\n(AES-GCM)" as C2 <<control>>
+  usecase "Deny Scene Listing\n(Firestore rules)" as C3 <<control>>
+  usecase "Sanitize Links, Allowlist\nand Sandbox Embeds" as C4 <<control>>
+  usecase "Embed Scene Only on Opt-In" as C5 <<control>>
+}
+
+actor "External Attacker" as Attacker <<attacker>>
+actor "Malicious Collaborator\n(holds a valid room link)" as Insider <<attacker>>
+
+Drawer -- UC1
+Drawer -- UC2
+Drawer -- UC3
+UC2 -- Backend
+
+UC1 ..> Maintainer : notifies\n<<crash telemetry>>
+UC2 ..> Maintainer : notifies\n<<crash telemetry>>
+UC3 ..> Maintainer : notifies\n<<crash telemetry>>
+
+MC1 -- Attacker
+MC2 -- Attacker
+MC3 -- Attacker
+MC5 -- Attacker
+MC3 -- Insider
+MC4 -- Insider
+
+MC1 .[#B00020].> MC2 : <<enables>>
+
+UC2 <.[#B00020]. MC1 : <<threatens>>
+UC2 <.[#B00020]. MC2 : <<threatens>>
+UC2 <.[#B00020]. MC3 : <<threatens>>
+UC1 <.[#B00020]. MC4 : <<threatens>>
+UC3 <.[#B00020]. MC5 : <<threatens>>
+
+C1 .[#1E7B3E].> MC1 : <<mitigates>>\n(partial)
+C2 .[#1E7B3E].> MC2 : <<mitigates>>
+C2 .[#1E7B3E].> MC3 : <<mitigates>>\n(partial: detects only)
+C3 .[#1E7B3E].> MC2 : <<mitigates>>
+C3 .[#1E7B3E].> MC3 : <<mitigates>>\n(partial)
+C4 .[#1E7B3E].> MC4 : <<mitigates>>
+C5 .[#1E7B3E].> MC5 : <<mitigates>>
+
+@enduml
