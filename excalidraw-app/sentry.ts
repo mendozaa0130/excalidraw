@@ -17,6 +17,30 @@ const onlineEnv =
     (item) => window.location.hostname.indexOf(item) >= 0,
   );
 
+// The URL fragment carries secrets: the collaboration room key
+// (`#room=<id>,<key>`) and share-link keys (`#json=<id>,<key>`). Browsers never
+// send the fragment to servers, so telemetry must not send it either.
+const stripUrlFragment = (url: string) => url.replace(/#.*$/, "");
+
+// Breadcrumb fields that hold URLs: `from`/`to` on navigation breadcrumbs
+// (recorded on every `history.pushState`, e.g. when a collab room starts) and
+// `url` on fetch/xhr breadcrumbs.
+const BREADCRUMB_URL_KEYS = ["from", "to", "url"] as const;
+
+export const scrubBreadcrumb = (
+  breadcrumb: Sentry.Breadcrumb,
+): Sentry.Breadcrumb => {
+  const { data } = breadcrumb;
+  if (data) {
+    for (const key of BREADCRUMB_URL_KEYS) {
+      if (typeof data[key] === "string") {
+        data[key] = stripUrlFragment(data[key]);
+      }
+    }
+  }
+  return breadcrumb;
+};
+
 Sentry.init({
   dsn: onlineEnv
     ? "https://7bfc596a5bf945eda6b660d3015a5460@sentry.io/5179260"
@@ -36,9 +60,10 @@ Sentry.init({
     }),
     Sentry.featureFlagsIntegration(),
   ],
+  beforeBreadcrumb: scrubBreadcrumb,
   beforeSend(event) {
     if (event.request?.url) {
-      event.request.url = event.request.url.replace(/#.*$/, "");
+      event.request.url = stripUrlFragment(event.request.url);
     }
 
     if (!event.exception) {
