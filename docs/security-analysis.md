@@ -1,6 +1,6 @@
-# Misuse Cases
+# Security Analysis
 
-This page extends the [use case diagram](requirements-and-use-cases.md#part-5-use-case-diagram) with attacker behaviour. Line references are as of commit `40c1bdf53`.
+Security analysis of Excalidraw for Assignment A5. Part 1 extends the [use case diagram](requirements-and-use-cases.md#part-5-use-case-diagram) with attacker behaviour. Code line references are as of commit `40c1bdf53`.
 
 ## Part 1: Misuse Case Diagram
 
@@ -250,3 +250,7 @@ All three come from one design decision: the room link is the only credential. R
 **Trade-off:** all of this gives up some of Excalidraw's "share a link, no sign-up" simplicity. Anonymous auth with host approval keeps the sign-up-free experience while still giving the server an identity to check.
 
 **Just below the top three:** the release pipeline (crossings 5 and 7). Likelihood is low because pushing to `release` needs write access, but a malicious package published with `NPM_TOKEN` would reach every app that embeds `@excalidraw/excalidraw`. The control belongs in `.github/workflows/autorelease-excalidraw.yml`: pin the `@actions/core` install, move publishing to short-lived credentials, and require review on `release` through branch protection. This falls under A03:2025 Software Supply Chain Failures.
+
+## AI Use Log
+
+See [`docs/ai-use-log-a5-security-analysis.md`](ai-use-log-a5-security-analysis.md) for what Claude Code did versus what I did on this assignment.
