@@ -21,7 +21,7 @@ Excalidraw has no accounts, logins or roles, so a session cannot be stolen and p
 
 | Misuse case | Threatens | Attacker | Control | Mitigates? |
 | --- | --- | --- | --- | --- |
-| **Steal Room Link** | Collaborate in Real Time | External Attacker | **Keep Room Key out of Requests:** the key is in the URL fragment, which browsers do not send to servers, and `beforeSend` removes the fragment from the Sentry request URL (`excalidraw-app/sentry.ts:41`). | Partial. A link that leaks through chat, a screenshot or browser history still works, and I found no way to revoke it. The Sentry scrub also misses navigation breadcrumbs (see [Part 2](#misuse-case-steal-room-link)). |
+| **Steal Room Link** | Collaborate in Real Time | External Attacker | **Keep Room Key out of Requests:** the key is in the URL fragment, which browsers do not send to servers, and `beforeSend` removes the fragment from the Sentry request URL (`excalidraw-app/sentry.ts:41`). | Partial. A link that leaks through chat, a screenshot or browser history still works, and I found no way to revoke it. The Sentry scrub also missed navigation breadcrumbs (see [Part 2](#misuse-case-steal-room-link)), which is fixed in [Part 7](#part-7-implement-one-control). |
 | **Read Another User's Drawing** | Collaborate in Real Time | External Attacker | **Encrypt Scenes End-to-End:** scenes are encrypted with AES-GCM before they reach the relay or Firestore (`excalidraw-app/collab/Portal.tsx:93`, `excalidraw-app/data/firebase.ts:99`). **Deny Scene Listing:** `allow list: if false` stops anyone enumerating rooms (`firebase-project/firestore.rules:7`). | Yes, unless the attacker has the link. That is why Steal Room Link *enables* this misuse case. |
 | **Overwrite a Stored Scene** | Collaborate in Real Time | External Attacker, Malicious Collaborator | **Encrypt Scenes End-to-End:** without the key, a forged scene fails AES-GCM decryption (`excalidraw-app/data/firebase.ts:219`, `:262`). **Deny Scene Listing:** the attacker has to learn a room ID first. | Partial. See the gap below. |
 | **Plant Malicious Link in a Scene** | Draw a Diagram | Malicious Collaborator | **Sanitize Links, Allowlist and Sandbox Embeds:** links are normalized when a scene is restored (`packages/excalidraw/data/restore.ts:511`, `packages/common/src/url.ts:10`), embeds must match an allowlist (`packages/element/src/embeddable.ts:133`), and they render in a sandboxed iframe (`packages/excalidraw/components/App.tsx:2052`). | Yes for script URLs: `sanitizeUrl` returned `about:blank` for the `javascript:` and `data:` test values. A normal `https://` link to a phishing page still passes. |
@@ -65,7 +65,7 @@ The gap and the failure behaviour come from reading the code. I did not test the
 
 | Step | Control that could stop it | Status today |
 | --- | --- | --- |
-| 1 | **Keep the key out of telemetry:** add a `beforeBreadcrumb` hook to `excalidraw-app/sentry.ts` that strips the fragment from navigation breadcrumbs. | **Partial.** The fragment is not sent to servers in requests, and `beforeSend` scrubs the Sentry request URL (`excalidraw-app/sentry.ts:41`). The breadcrumb is not scrubbed, so a crash report sent after a room is created can contain the key. This only exposes the key to someone with access to the Sentry data. |
+| 1 | **Keep the key out of telemetry:** add a `beforeBreadcrumb` hook to `excalidraw-app/sentry.ts` that strips the fragment from navigation breadcrumbs. | **Partial.** The fragment is not sent to servers in requests, and `beforeSend` scrubs the Sentry request URL (`excalidraw-app/sentry.ts:41`). The breadcrumb is not scrubbed, so a crash report sent after a room is created can contain the key. This only exposes the key to someone with access to the Sentry data. **The breadcrumb scrub was added in [Part 7](#part-7-implement-one-control).** |
 | 2 | **Separate the key from the link:** share the key or a room password through a second channel, so that one leaked message is not enough. | Missing. |
 | 5 | **Check access on join:** require an invitation or host approval, enforced by the backend. | Missing. Excalidraw has no accounts, so this would be a significant design change. The relay is not in this repository, so I could not review what it enforces. |
 | 5 | **Show who is present:** the attacker appears in the collaborator list (`excalidraw-app/collab/Collab.tsx:875`). | Exists, but it only detects the attack and does not stop it. Usernames are not verified, and the Firestore variation avoids the list entirely. |
@@ -156,7 +156,7 @@ Source: [`docs/trust-boundary-diagram.puml`](trust-boundary-diagram.puml) (Plant
 | 5 | Push to `release` (Maintainer → TB8) | GitHub requires write access. The release workflows start on any push to `release` (`.github/workflows/autorelease-excalidraw.yml:2`). No review gate is visible in the repository, though branch protection may be configured in GitHub settings, which I cannot see. | GitHub |
 | 6 | Fork pull request (Contributor → TB7) | GitHub withholds repository secrets from `pull_request` jobs on forks, and no workflow uses `pull_request_target`. The pull request's code runs unreviewed, which is acceptable only because there are no secrets in that path. | GitHub |
 | 7 | Dependencies (npm → TB7, TB8) | `yarn.lock` integrity hashes check that packages match the lockfile. **Nothing reviews what the packages contain.** The release job also runs `yarn add @actions/core -W` after writing `NPM_TOKEN` into the npm config (`.github/workflows/autorelease-excalidraw.yml:21`, `:26`), so it installs a version not pinned by the lockfile in the one job that holds the publishing token. | Yarn |
-| 8 | Crash reports (TB1 → Sentry) | `beforeSend` removes the fragment from the request URL (`excalidraw-app/sentry.ts:41`). **Navigation breadcrumbs are not scrubbed, so the room key can be sent** (tested; see [How these were checked](#how-these-were-checked)). | App |
+| 8 | Crash reports (TB1 → Sentry) | `beforeSend` removes the fragment from the request URL (`excalidraw-app/sentry.ts:41`). **Navigation breadcrumbs were not scrubbed, so the room key could be sent** (tested; see [How these were checked](#how-these-were-checked)). Fixed in [Part 7](#part-7-implement-one-control). | App |
 | 9 | AI backend (TB1 ⇄ TB3, response into TB2) | **Nothing validates the returned HTML.** It is rendered in a `srcdoc` iframe whose sandbox omits `allow-same-origin` (`packages/excalidraw/components/App.tsx:1841`, `:2052`), so its scripts run in an opaque origin and cannot read the app's data. In the other direction, an image of the frame and its text are sent unencrypted, apart from HTTPS (`excalidraw-app/components/AI.tsx:53`). Unlike at crossings 2, 3 and 11, the backend sees the drawing content. | Browser sandbox |
 | 10 | Embedded pages (TB5 → TB2) | The embed URL must match a domain allowlist (`packages/element/src/embeddable.ts:133`), and the page runs in a sandboxed iframe (`packages/excalidraw/components/App.tsx:2052`). The sandbox still allows scripts, forms and popups. | App and browser |
 | 11 | Share link export (TB1 → TB3) | The scene is compressed and encrypted with a new key before upload, and the key stays in the link fragment (`excalidraw-app/data/index.ts:248`). | App |
@@ -170,7 +170,7 @@ Each of these is a crossing where something goes unvalidated:
 - **(3):** the data store validates nothing, so every check happens in a client that an attacker can bypass.
 - **(4c):** a `#url=` link can load a scene from any host.
 - **(7):** nothing reviews package contents, and the job holding `NPM_TOKEN` installs an unpinned package.
-- **(8):** the room key can reach Sentry in a breadcrumb.
+- **(8):** the room key could reach Sentry in a breadcrumb. This is fixed in Part 7.
 - **(9):** generated HTML is not validated, and the sandbox is the only control.
 
 ### Misplaced trust: decryption treated as proof of authorship
@@ -210,7 +210,7 @@ All three come from one design decision: the room link is the only credential. R
 **Architectural mitigation:**
 - **Expiry and revocation belong in the collaboration backend: the relay's `join-room` handler and `firebase-project/firestore.rules`.** The backend keeps a record for each room with an expiry time and a key epoch. The relay refuses joins, and the rules refuse reads, for expired or superseded epochs. This control has to live on the server side of crossings 2 and 3, because a check in the client can simply be removed by an attacker who already has the link.
 - **Key rotation belongs in the client, in `excalidraw-app/collab/Collab.tsx` next to where keys are generated (`:501`).** When the host rotates, the client generates a new key, re-encrypts the scene and shares a new link. The client is the right place because of end-to-end encryption: the server never holds the key, so it cannot rotate it. The server's job is only to stop serving the old epoch.
-- **Telemetry scrubbing belongs in `excalidraw-app/sentry.ts`, as a `beforeBreadcrumb` hook next to `beforeSend` (`:39`).** That file is the single point every Sentry event and breadcrumb passes through. Scrubbing at each `pushState` call would miss any future call site, and scrubbing on Sentry's servers is too late because the key has already left the browser.
+- **Telemetry scrubbing belongs in `excalidraw-app/sentry.ts`, as a `beforeBreadcrumb` hook next to `beforeSend` (`:39`).** That file is the single point every Sentry event and breadcrumb passes through. Scrubbing at each `pushState` call would miss any future call site, and scrubbing on Sentry's servers is too late because the key has already left the browser. This control is implemented in Part 7.
 
 ### Risk 2: Stored scene overwritten by anyone who knows its path
 
@@ -250,6 +250,185 @@ All three come from one design decision: the room link is the only credential. R
 **Trade-off:** all of this gives up some of Excalidraw's "share a link, no sign-up" simplicity. Anonymous auth with host approval keeps the sign-up-free experience while still giving the server an identity to check.
 
 **Just below the top three:** the release pipeline (crossings 5 and 7). Likelihood is low because pushing to `release` needs write access, but a malicious package published with `NPM_TOKEN` would reach every app that embeds `@excalidraw/excalidraw`. The control belongs in `.github/workflows/autorelease-excalidraw.yml`: pin the `@actions/core` install, move publishing to short-lived credentials, and require review on `release` through branch protection. This falls under A03:2025 Software Supply Chain Failures.
+
+## Part 5: Security Bug History
+
+Excalidraw has three published security advisories, all for `@excalidraw/excalidraw` and all rated medium. The two below were reported and fixed in the editor's own code. The third, [GHSA-39h7-pwv7-rc3x](https://github.com/excalidraw/excalidraw/security/advisories/GHSA-39h7-pwv7-rc3x), was an XSS that came in through the Mermaid dependency and was fixed by upgrading it, so it belongs with Part 6.
+
+### CVE-2023-26140: script URLs in element links
+
+**Advisory:** [GHSA-v7v8-gjv7-ffmr](https://github.com/excalidraw/excalidraw/security/advisories/GHSA-v7v8-gjv7-ffmr) (CWE-79). It affected versions before 0.15.3 and was fixed by [#6728](https://github.com/excalidraw/excalidraw/pull/6728), commit `139b901ff`.
+
+**What happened:** an element's `link` was written straight into an `href`, both in the link popup and in exported SVG (`setAttribute("href", element.link)`). A scene containing a `javascript:` link ran script when someone clicked it. A function called `normalizeLink` already existed, but all it did was add `https://` to links without a scheme. It let `javascript://%0aalert(...)` through, because that string already contains `://`, and it was only called when opening a new window.
+
+**Architectural root cause:** the editor treated scene data as trusted. Links arrive from files, share links, collaboration and the host app's API, but nothing marked them as untrusted. Each place that displayed a link decided for itself whether to clean it, and "normalize" was a formatting step, not a security control.
+
+**Structural or narrow:** partly structural. The fix replaced the formatter with a real sanitizer (`@braintree/sanitize-url`) and called it when scenes are loaded (`restore.ts`), so files, share links and collaboration updates are all cleaned on the way in. It also kept the sanitizer at every display point. A 2025 follow-up, `b63689c23` ([#8977](https://github.com/excalidraw/excalidraw/pull/8977)), made attribute sanitization stricter.
+
+**Could it reappear?** Yes, through one path. The host app API's `updateScene` puts elements in the scene without restoring them (`packages/excalidraw/components/App.tsx:4942`), so elements from an embedding app skip the load-time check. Today every display point I found calls `normalizeLink`: `Hyperlink.tsx:283` and `:295`, `staticSvgScene.ts:135` and `:369`, and `App.tsx:6513`. A new feature that reads `element.link` directly would bring the bug back for API-supplied scenes.
+
+**OWASP:** A05:2025 Injection [A03:2021].
+
+### CVE-2024-32472: stored XSS through web embeds
+
+**Advisory:** [GHSA-m64q-4jqh-f72f](https://github.com/excalidraw/excalidraw/security/advisories/GHSA-m64q-4jqh-f72f) (CWE-80). It affected versions 0.16.0 up to 0.17.6 and was fixed in 0.17.6 and 0.16.4 by commits `0ae9b383d` ([#7883](https://github.com/excalidraw/excalidraw/pull/7883)), `afcde542f` ([#7884](https://github.com/excalidraw/excalidraw/pull/7884)) and `da2e50729` ([#7889](https://github.com/excalidraw/excalidraw/pull/7889)).
+
+**What happened:** to support Twitter and Gist embeds, the editor accepted HTML snippets. If the "link" contained `<blockquote` or `<script>`, it was placed verbatim into the iframe's `srcdoc` (`createSrcDoc(link)`), and Twitter URLs were inserted into HTML without escaping. Every embed iframe also got `allow-same-origin allow-scripts`. A `srcdoc` iframe takes its parent page's origin, so with those two flags the injected script ran as the Excalidraw app itself.
+
+**Architectural root cause:** two design decisions made each other worse. First, embeds were built by putting untrusted strings into HTML templates. Second, the sandbox gave every embed full same-origin privileges, whether the provider needed them or not. Either problem alone was limited; together they gave arbitrary script execution in the editor's origin.
+
+**Structural or narrow:** mixed.
+- **Structural:** `allow-same-origin` is now only granted to an allowlist of providers (`packages/element/src/embeddable.ts:152`), which applies least privilege to every embed, including future ones.
+- **Narrow:** the injection fix replaced verbatim snippets with strict parsing, so an ID is extracted with a regex and the `srcdoc` is rebuilt from it. That is still done separately for each provider with string templates.
+
+**Could it reappear?** Yes. Twitter and Reddit embeds are still built as `srcdoc` HTML templates (`packages/element/src/embeddable.ts:330`, `:354`), and both providers are on the same-origin allowlist. They are only safe because the IDs are extracted with a regex and escaped with `escapeDoubleQuotes`. A new provider added the same way, or one mistake in that escaping, would run script as the app again. A structural fix would avoid putting `srcdoc` content in the app's origin at all, for example by hosting embed wrappers on a separate domain.
+
+**OWASP:** A05:2025 Injection [A03:2021]. The over-permissive sandbox also counts as A02:2025 Security Misconfiguration [A05:2021].
+
+## Part 6: Supply Chain and Dependency Analysis
+
+### SBOM
+
+[`docs/sbom.json`](sbom.json) is a CycloneDX 1.7 SBOM generated with Syft 1.56.0:
+
+```
+syft dir:. --exclude './**/node_modules/**' --exclude './.git/**' -o cyclonedx-json=docs/sbom.json
+```
+
+Excluding `node_modules` makes the SBOM reflect the committed lockfiles rather than whatever happens to be installed locally. It covers the main workspace (`yarn.lock`), the documentation site (`dev-docs/yarn.lock`), the Next.js example (`examples/with-nextjs/yarn.lock`) and the GitHub Actions used by the workflows.
+
+| | Count |
+| --- | --- |
+| npm packages declared directly in the repository's 12 `package.json` files, not counting internal workspace packages | **110** |
+| Packages in the SBOM | **1,604**: 1,579 npm packages and 25 GitHub Actions |
+| Package versions the shipped editor and app actually load at runtime, starting from the `dependencies` of `excalidraw-app` and `packages/*` | 452 |
+
+The gap exists because each direct dependency brings in its own dependencies, recursively, and the lockfiles keep several versions of the same package wherever different parents need different versions.
+
+### Known vulnerabilities
+
+`osv-scanner scan source -r .` (osv-scanner 2.7.0) reported 547 findings in 127 package versions. Most are in the documentation site, the example app and build tools. **21 package versions in the shipped runtime set have advisories.** I opened and read the two below.
+
+**socket.io-parser 4.2.4: reachable.**
+- **Advisory:** [GHSA-677m-j7p3-52f9](https://github.com/socketio/socket.io/security/advisories/GHSA-677m-j7p3-52f9), [CVE-2026-33151](https://nvd.nist.gov/vuln/detail/CVE-2026-33151), also on [osv.dev](https://osv.dev/vulnerability/GHSA-677m-j7p3-52f9).
+- **Affected range:** `>=4.0.0 <4.2.6` for the 4.x line used by `socket.io-client@4.x`, fixed in 4.2.6. Older lines are also affected (`<3.3.5`, and `>=3.4.0 <3.4.4`).
+- **Breaks:** availability (CVSS 4.0 `VA:H`). A crafted packet can declare an unbounded number of binary attachments, and the decoder buffers them until memory runs out.
+- **Call path:** every message the app receives from the relay goes through the vulnerable decoder:
+  1. `excalidraw-app/collab/Collab.tsx` `startCollaboration` creates the `socket.io-client` connection, and `Portal.tsx` registers its listeners.
+  2. `socket.io-client` `Manager.ondata` (`node_modules/socket.io-client/build/esm/manager.js:193`) calls `this.decoder.add(data)` (`:195`).
+  3. `socket.io-parser` `Decoder` reads the attachment count (`node_modules/socket.io-parser/build/esm/index.js:182`–`191`).
+
+  The decoder is present in the production bundle.
+- **Who can exploit it:** the advisory is mainly about the server. On the client side, only whoever controls the relay connection can send that packet, and the most they can do is crash one Drawer's tab. Other collaborators' messages are re-sent by the relay, whose own socket.io version is not in this repository.
+- **Fix:** `socket.io-client@4.7.2` requires `socket.io-parser "~4.2.4"`, which 4.2.6 satisfies, so refreshing the lockfile fixes it without touching `package.json`.
+
+**protobufjs 7.4.0: in the tree, not reachable.**
+- **Advisory:** [GHSA-xq3m-2v4x-88gg](https://github.com/protobufjs/protobuf.js/security/advisories/GHSA-xq3m-2v4x-88gg), [CVE-2026-41242](https://nvd.nist.gov/vuln/detail/CVE-2026-41242), also on [osv.dev](https://osv.dev/vulnerability/GHSA-xq3m-2v4x-88gg).
+- **Affected range:** `<7.5.5`, and `8.0.0`.
+- **Breaks:** confidentiality, integrity and availability, through arbitrary code execution. This requires loading a protobuf schema or descriptor that the attacker controls.
+- **Why it isn't reachable:** it is only pulled in through `firebase` → `@firebase/firestore` → `@grpc/grpc-js` → `@grpc/proto-loader`. Those are used only by Firestore's Node build (`dist/index.node.cjs.js`). The browser build Vite uses (`dist/index.esm2017.js`) contains no reference to `@grpc` or `protobufjs`, and neither does the built app in `excalidraw-app/build/assets`. Even in Node, Firestore loads only its own bundled schemas. **There is no call path from Excalidraw's code.**
+
+### Provenance
+
+Excalidraw does not sign its releases or publish build attestations:
+- **npm:** the current `latest` (0.18.1) and `next` versions of `@excalidraw/excalidraw` have no `attestations` entry in the npm registry. `scripts/release.js` publishes with `yarn publish --tag` (`:216`), from a workflow with no `id-token: write` permission. No workflow mentions provenance, attestations, cosign, Sigstore or SLSA.
+- **Registry signatures:** the tarballs do carry npm's own registry signatures. These prove the file is what npm received, not which commit built it.
+- **GitHub releases:** v0.18.1 has no files attached. v0.18.0 has a `.tgz` but no `.sig` or `.intoto.jsonl`.
+- **Docker:** `publish-docker.yml` has no cosign step. I did not check Docker Hub for the default build attestation that `docker/build-push-action` may attach.
+
+**Could a user prove an artifact was built from the commit it claims?** No. The `next` version names end in a short commit hash (`scripts/release.js:138`), but that is just a label set by whoever runs the release script.
+
+### OWASP mapping
+
+- **A06:2021 Vulnerable and Outdated Components** (now part of A03:2025 Software Supply Chain Failures): the lockfile pins 21 runtime package versions with published advisories, including socket.io-parser above. One of them was already disclosed as an Excalidraw advisory, the Mermaid issue mentioned in Part 5.
+- **A08:2021 Software and Data Integrity Failures** (A08:2025): releases carry no provenance, the release job installs an unpinned `@actions/core` after the npm token is set (Part 3, crossing 7), and the lint and test workflows run `yarn install` without `--frozen-lockfile`.
+
+### Recommendation: publish with npm provenance through trusted publishing
+
+Change the release workflow to publish through npm trusted publishing:
+- add `permissions: id-token: write` to `.github/workflows/autorelease-excalidraw.yml`;
+- publish each package with `npm publish --provenance` instead of `yarn publish`;
+- register the workflow as the trusted publisher for each `@excalidraw` package on npmjs.com;
+- delete the `NPM_TOKEN` secret.
+
+Every release would then carry a Sigstore-signed statement of the repository, workflow and commit that built it, which users can check with `npm audit signatures`. It also removes the long-lived publishing token from Part 3's crossing 7.
+
+**Cost to the maintainers:**
+- rewrite and retest the publish step in `scripts/release.js`, because Yarn 1's `publish` has no provenance option;
+- a one-time setup on npmjs.com for each published package;
+- giving up publishing from a laptop: every release, including emergency patch releases like the `patch-0.16` dist-tag, has to go through CI.
+
+## Part 7: Implement One Control
+
+**Commit:** [`87b2b490d`](https://github.com/mendozaa0130/excalidraw/commit/87b2b490d803cf9f902a719ff3b3d081538fa5ba), "A5-Fix: Scrub URL fragments from Sentry breadcrumbs in excalidraw-app/sentry.ts".
+
+**What it closes:** threat model Risk 1 (Information Disclosure of the room link and key), specifically the telemetry mitigation. It removes one way of obtaining the link in step 1 of the Steal Room Link misuse case. **It defends crossing 8** (crash reports, TB1 → Sentry), which Part 3 found was not validated.
+
+### Before
+
+`excalidraw-app/sentry.ts`, at commit `40c1bdf53`. Only the request URL was scrubbed (`:39`–`:42`), and nothing touched breadcrumbs:
+
+```ts
+20  Sentry.init({
+    ...
+39    beforeSend(event) {
+40      if (event.request?.url) {
+41        event.request.url = event.request.url.replace(/#.*$/, "");
+42      }
+```
+
+### After
+
+`excalidraw-app/sentry.ts`, at commit `87b2b490d`. A `beforeBreadcrumb` hook (`:63`) strips the fragment from every breadcrumb's `from`, `to` and `url` fields (`:20`–`:41`), and `beforeSend` (`:66`) uses the same helper:
+
+```ts
+23  const stripUrlFragment = (url: string) => url.replace(/#.*$/, "");
+    ...
+28  const BREADCRUMB_URL_KEYS = ["from", "to", "url"] as const;
+29
+30  export const scrubBreadcrumb = (
+31    breadcrumb: Sentry.Breadcrumb,
+32  ): Sentry.Breadcrumb => {
+33    const { data } = breadcrumb;
+34    if (data) {
+35      for (const key of BREADCRUMB_URL_KEYS) {
+36        if (typeof data[key] === "string") {
+37          data[key] = stripUrlFragment(data[key]);
+38        }
+39      }
+40    }
+41    return breadcrumb;
+42  };
+    ...
+63    beforeBreadcrumb: scrubBreadcrumb,
+64    beforeSend(event) {
+65      if (event.request?.url) {
+66        event.request.url = stripUrlFragment(event.request.url);
+```
+
+`excalidraw-app/tests/sentry.test.ts` (new) checks the scrubbing on navigation, share-link and fetch breadcrumbs, and checks that the hook is registered with the app's Sentry client. Its last test re-initializes Sentry with the app's own options and an in-memory transport, starts a room with `pushState`, and captures an error. It asserts that a navigation breadcrumb was recorded and that the room key is not in what would be sent.
+
+### Why this component
+
+`sentry.ts` is the last point where data passes before it leaves the browser for a third party, and every event and breadcrumb goes through it.
+- **Not at the `pushState` calls:** scrubbing where the URL is set (`Collab.tsx:502`, `:392` and `App.tsx`) would miss the next call site anyone adds. The SDK also records the starting URL of a navigation on its own.
+- **Not on Sentry's servers:** server-side scrubbing would be too late, because the key would already be with a third party.
+- **Not by turning breadcrumbs off:** that would remove the debugging context the Maintainer relies on.
+
+### Verification
+
+- **Tests:** `node_modules/.bin/vitest --update --watch=false`, which is what `yarn test:update` runs. Yarn is not installed on this machine. Result: **144 test files passed. 2,516 tests passed, 47 were skipped and 1 is a todo.** No snapshots changed.
+- **Test detects the bug:** with the `beforeBreadcrumb` line temporarily removed, 2 of the 6 new tests fail, and the end-to-end test fails because the event it would send contains the room key.
+- **Type check:** `tsc` (`yarn test:typecheck`) passed with no errors.
+- **Build:** `vite build` in `excalidraw-app` succeeded, and `eslint` and `prettier` report no issues in the changed files.
+- **Scope:** nothing was tested against a deployed instance. The test's Sentry address (`sentry.invalid`) cannot resolve, and the transport stays in memory.
+
+### What it does not fix
+
+- **The link is still the only credential.** Anyone who gets it from a chat, browser history or a screenshot still has full access, and it cannot expire or be revoked. That needs Risk 1's server-side expiry and key rotation.
+- **Only three fields are scrubbed:** `from`, `to` and `url`. A key that ends up in a console message, an exception message or custom context, for example if code logs `location.href`, would still be sent. A complete fix would also scrub fragment-like strings from every string field in `beforeSend`.
+- **Other telemetry is not covered,** such as analytics events, and I have not reviewed it.
+- **Past reports are unchanged.** Keys already sent in earlier crash reports stay in Sentry until they are deleted there.
 
 ## AI Use Log
 
