@@ -182,3 +182,71 @@ At crossings 2 and 3, the app treats anything that decrypts with the room key as
 **If the trust is misplaced:** anyone who has ever held the link, such as a former collaborator or someone who found it in a chat, can write a scene with inflated version numbers. Every honest client accepts it, applies it to its canvas and saves it back to Firestore, so the tampered version spreads and replaces the original with no record of who changed it. Part 2's Overwrite a Stored Scene walks through this step by step. The rules at crossing 3 do not check identity either, so nothing on either side of the boundary catches it.
 
 **How this was checked:** by reading the code and workflow files, at the same commit as the line references above. The relay, JSON share backend and AI backend are not in this repository, and I cannot see the repository's GitHub settings, so what they validate is unknown and is not credited to them above.
+
+## Part 4: Threat Model
+
+These are the three highest-scoring threats from the STRIDE grid, where risk is likelihood × impact on a 1–3 scale for each. OWASP categories are from the [Top 10:2025](https://owasp.org/Top10/2025/), with the [2021](https://owasp.org/Top10/2021/) number in brackets.
+
+| # | Risk | Asset | STRIDE | OWASP | Likelihood | Impact | Score |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Room link leaks and can never be revoked | Room link and encryption key | Information Disclosure | A04 Cryptographic Failures [A02:2021] | High (3) | High (3) | 9 |
+| 2 | Stored scene overwritten by anyone who knows its path | Stored scenes and files | Tampering | A01 Broken Access Control [A01:2021] | Medium (2) | High (3) | 6 |
+| 3 | Anyone holding the link is accepted as a collaborator | Collaboration session | Spoofing | A07 Authentication Failures [A07:2021] | High (3) | Medium (2) | 6 |
+
+All three come from one design decision: the room link is the only credential. Risk 1 is about losing that credential, risk 3 is that it cannot tell people apart, and risk 2 is that the data store does not even ask for it.
+
+### Risk 1: Room link leaks and can never be revoked
+
+**Asset:** the room link and the AES-GCM key inside it. Holding the key gives full read and write access to the room.
+
+**STRIDE:** Information Disclosure.
+
+**OWASP:** A04:2025 Cryptographic Failures. The encryption itself is sound, but OWASP lists key management under this category, including keys that are not rotated, and that is where it fails. The key travels inside a shareable URL, never expires, cannot be rotated and can be written to a crash report (crossings 1 and 8). Putting the key in Sentry also falls under A09:2025 Security Logging and Alerting Failures, which covers sensitive data in logs.
+
+**Likelihood: High.** The link is designed to be pasted into chats, tickets and email, and it stays in browser history. Nothing makes an old link stop working. The Sentry breadcrumb leak happens without anyone doing anything wrong.
+
+**Impact: High.** One leaked link exposes the whole drawing, every later update and the ability to edit, and it enables risks 2 and 3.
+
+**Architectural mitigation:**
+- **Expiry and revocation belong in the collaboration backend: the relay's `join-room` handler and `firebase-project/firestore.rules`.** The backend keeps a record for each room with an expiry time and a key epoch. The relay refuses joins, and the rules refuse reads, for expired or superseded epochs. This control has to live on the server side of crossings 2 and 3, because a check in the client can simply be removed by an attacker who already has the link.
+- **Key rotation belongs in the client, in `excalidraw-app/collab/Collab.tsx` next to where keys are generated (`:501`).** When the host rotates, the client generates a new key, re-encrypts the scene and shares a new link. The client is the right place because of end-to-end encryption: the server never holds the key, so it cannot rotate it. The server's job is only to stop serving the old epoch.
+- **Telemetry scrubbing belongs in `excalidraw-app/sentry.ts`, as a `beforeBreadcrumb` hook next to `beforeSend` (`:39`).** That file is the single point every Sentry event and breadcrumb passes through. Scrubbing at each `pushState` call would miss any future call site, and scrubbing on Sentry's servers is too late because the key has already left the browser.
+
+### Risk 2: Stored scene overwritten by anyone who knows its path
+
+**Asset:** stored scenes in Firestore and files in Storage.
+
+**STRIDE:** Tampering.
+
+**OWASP:** A01:2025 Broken Access Control. The rules `allow get, write: if true` for every document (`firebase-project/firestore.rules:5`), and Storage does the same for room files. The server performs no authorization at all, so every access decision is left to a client the attacker controls. The client also accepts any element that decrypts and trusts its version number (`packages/excalidraw/data/reconcile.ts:35`). That adds A08:2025 Software or Data Integrity Failures.
+
+**Likelihood: Medium.** It needs someone who has held the link and intends harm, plus a small script against the public Firebase configuration. An External Attacker with only the room ID can corrupt or delete the scene, but cannot make clients accept fake content.
+
+**Impact: High.** The tampering is silent, it looks like a normal edit, honest clients re-save it, and no scene history exists to recover from. Part 2's Overwrite a Stored Scene shows the full attack.
+
+**Architectural mitigation:**
+- **Write authorization belongs in `firebase-project/firestore.rules` and `firebase-project/storage.rules`.** The rules should require `request.auth`, allow writes to `scenes/{roomId}` only from members listed for that room, and refuse deletes. The rules are the right place because they are the only component every write passes through, including writes from scripts that bypass the app, as in step 5 of the attack. A check in `excalidraw-app/data/firebase.ts` would protect only honest clients.
+- **Recovery belongs in the data layer: make history append-only.** Write each save as a new document under `scenes/{roomId}/versions/`, which the rules allow to be created but never updated or deleted. Tampering can then be undone. This also has to be server-enforced, because a client-side backup is under the attacker's control too.
+- **Authorship checks belong in the app layer, in `excalidraw-app/collab/Collab.tsx` `_reconcileElements` (`:771`), before elements reach `reconcileElements`.** Each collaborator signs their changes with a per-user key, and the client drops changes whose signature does not match a current member. This has to be in the client because the server only ever sees ciphertext and cannot inspect elements. It belongs in `excalidraw-app` rather than `packages/excalidraw/data/reconcile.ts` because the package is a library that other host apps use with their own trust models.
+
+### Risk 3: Anyone holding the link is accepted as a collaborator
+
+**Asset:** the collaboration session, meaning the collaborators' assumption that everyone in the room was invited.
+
+**STRIDE:** Spoofing.
+
+**OWASP:** A07:2025 Authentication Failures. The system never establishes who a participant is. The client joins by sending only the room ID (`excalidraw-app/collab/Portal.tsx:45`), and the name other people see is a random username that the participant can change (`excalidraw-app/collab/Collab.tsx:486`).
+
+**Likelihood: High.** It needs nothing beyond the link, and links spread as described in risk 1.
+
+**Impact: Medium.** On its own it gives an intruder presence and lets them pose as someone else. Most of the damage comes when it is combined with risks 1 and 2, which have their own scores.
+
+**Architectural mitigation:**
+- **Identity is issued by an auth service in the backend tier and checked by the relay on `join-room`.** Firebase Anonymous Auth would do for the app's no-account model. The client sends an ID token with `join-room` in `excalidraw-app/collab/Portal.tsx`, and the relay checks it against the room's member list, which the host controls. The check belongs at the relay because the relay is the gatekeeper for crossing 2. The client can only present a token; it cannot be trusted to judge its own.
+- **The same identity feeds the Firestore rules through `request.auth`.** Risk 2's write authorization therefore depends on this risk being fixed first.
+- **Display names belong in `Collab.setCollaborators` (`excalidraw-app/collab/Collab.tsx:875`), bound to the verified identity from the relay rather than a name the client chose.** Other collaborators can then see who is really present.
+- **Host approval belongs in the share flow (`excalidraw-app/share/ShareDialog.tsx`).** The host sees join requests and can remove a member, which also triggers the key rotation from risk 1.
+
+**Trade-off:** all of this gives up some of Excalidraw's "share a link, no sign-up" simplicity. Anonymous auth with host approval keeps the sign-up-free experience while still giving the server an identity to check.
+
+**Just below the top three:** the release pipeline (crossings 5 and 7). Likelihood is low because pushing to `release` needs write access, but a malicious package published with `NPM_TOKEN` would reach every app that embeds `@excalidraw/excalidraw`. The control belongs in `.github/workflows/autorelease-excalidraw.yml`: pin the `@actions/core` install, move publishing to short-lived credentials, and require review on `release` through branch protection. This falls under A03:2025 Software Supply Chain Failures.
