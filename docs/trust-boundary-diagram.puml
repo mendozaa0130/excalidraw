@@ -1,0 +1,79 @@
+@startuml trust-boundary-diagram
+' Excalidraw trust boundary diagram. Dashed red boxes are trust boundaries;
+' every arrow that crosses one is numbered. Numbers 1-5 match the threat model's entry points.
+!pragma layout smetana
+left to right direction
+skinparam ArrowFontSize 11
+skinparam defaultTextAlignment center
+skinparam componentStyle rectangle
+
+skinparam rectangle {
+  BorderStyle<<boundary>> dashed
+  BorderColor<<boundary>> #B00020
+  FontColor<<boundary>> #B00020
+  BackgroundColor<<boundary>> transparent
+  StereotypeFontColor<<boundary>> transparent
+}
+
+actor "Drawer" as Drawer
+actor "Contributor\n(fork pull request)" as Contributor
+actor "Maintainer\n(write access)" as Maintainer
+
+rectangle "TB1  Drawer's browser: excalidraw.com origin" <<boundary>> {
+  component "Excalidraw app\n(React editor + collab client)" as App
+  rectangle "TB2  Sandboxed iframes (opaque origin)" <<boundary>> {
+    component "Embedded page" as EmbedFrame
+    component "AI-generated HTML\n(srcdoc)" as AIFrame
+  }
+}
+
+rectangle "TB3  Excalidraw-operated services (not in this repo)" <<boundary>> {
+  component "Collaboration relay\n(socket.io)" as Relay
+  component "JSON share backend\n(json.excalidraw.com)" as Json
+  component "AI backend\n(oss-ai.excalidraw.com)" as AI
+}
+
+rectangle "TB4  Google Firebase: no authentication" <<boundary>> {
+  database "Firestore\nscenes/{roomId}" as Firestore
+  database "Storage\nfiles/rooms/..." as Storage
+}
+
+rectangle "TB5  Third-party services" <<boundary>> {
+  component "Sentry" as Sentry
+  component "Embed providers\n(YouTube, Figma, ...)" as Providers
+  component "Library host\n(excalidraw.com)" as LibHost
+  component "Any host named\nin #url=" as AnyHost
+  component "npm registry /\nDocker Hub" as Registry
+}
+
+rectangle "TB6  GitHub Actions" <<boundary>> {
+  rectangle "TB7  Unauthenticated path: no secrets" <<boundary>> {
+    component "PR jobs\n(lint, test, size-limit)" as PRJobs
+  }
+  rectangle "TB8  Authenticated path: NPM_TOKEN, Docker, Sentry secrets" <<boundary>> {
+    component "Release jobs\n(autorelease, publish-docker,\nsentry-production)" as Release
+  }
+}
+
+Drawer --> App : (1) room link\n#room=id,key
+Drawer --> App : (4a) file, drop, paste
+Json --> App : (4b) #json= scene
+AnyHost --> App : (4c) #url= file
+LibHost --> App : (4d) #addLibrary= library
+
+App <--> Relay : (2) encrypted updates
+App <--> Firestore : (3) encrypted scene
+App <--> Storage : (3) encrypted files
+App --> Json : (11) encrypted share export
+App --> AI : (9) frame image + text
+AI --> AIFrame : (9) generated HTML
+Providers --> EmbedFrame : (10) embedded page
+App --> Sentry : (8) crash reports
+
+Maintainer --> Release : (5) push to release
+Contributor --> PRJobs : (6) PR code
+Registry --> PRJobs : (7) dependencies
+Registry --> Release : (7) dependencies
+Release --> Registry : (12) published package / image
+
+@enduml
