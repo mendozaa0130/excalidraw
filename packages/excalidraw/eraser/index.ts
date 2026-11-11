@@ -31,7 +31,11 @@ import { getBoundTextElementId } from "@excalidraw/element";
 import type { Bounds } from "@excalidraw/common";
 
 import type { GlobalPoint, LineSegment } from "@excalidraw/math/types";
-import type { ElementsMap, ExcalidrawElement } from "@excalidraw/element/types";
+import type {
+  ElementsMap,
+  ExcalidrawElement,
+  ExcalidrawFreeDrawElement,
+} from "@excalidraw/element/types";
 
 import { AnimatedTrail } from "../animatedTrail";
 
@@ -231,76 +235,15 @@ const eraserTest = (
     return true;
   }
 
-  // Freedraw elements are tested for erasure by measuring the distance
-  // of the eraser path and the freedraw shape outline lines to a tolerance
-  // which offers a good visual precision at various zoom levels
   if (isFreeDrawElement(element)) {
-    const outlinePoints = getFreedrawOutlinePoints(element);
-    const tolerance = Math.max(2.25, 5 / zoom); // NOTE: Visually fine-tuned approximation
+    return freedrawEraserTest(pathSegment, element, elementsMap, zoom);
+  }
 
-    // Very short, thin strokes can produce an empty outline (#11945), which
-    // getFreedrawOutlineAsSegments() rejects. Test the stroke's own points.
-    if (outlinePoints.length < 2) {
-      const points = element.points.map(([x, y]) =>
-        pointFrom<GlobalPoint>(element.x + x, element.y + y),
-      );
-      return points.some(
-        (point, i) =>
-          lineSegmentsDistance(
-            lineSegment(point, points[i + 1] ?? point),
-            pathSegment,
-          ) <= tolerance,
-      );
-    }
-
-    const strokeSegments = getFreedrawOutlineAsSegments(
-      element,
-      outlinePoints,
-      elementsMap,
-    );
-
-    for (const seg of strokeSegments) {
-      if (lineSegmentsDistance(seg, pathSegment) <= tolerance) {
-        return true;
-      }
-    }
-
-    const poly = polygon(
-      ...(outlinePoints.map(([x, y]) =>
-        pointFrom<GlobalPoint>(element.x + x, element.y + y),
-      ) as GlobalPoint[]),
-    );
-
-    // PERF: Check only one point of the eraser segment. If the eraser segment
-    // start is inside the closed freedraw shape, the other point is either also
-    // inside or the eraser segment will intersect the shape outline anyway
-    if (polygonIncludesPointNonZero(pathSegment[0], poly)) {
-      return true;
-    }
-
-    return false;
+  if (isArrowElement(element) || (isLineElement(element) && !element.polygon)) {
+    return linearEraserTest(pathSegment, element, elementsMap, zoom);
   }
 
   const boundTextElement = getBoundTextElement(element, elementsMap);
-
-  if (isArrowElement(element) || (isLineElement(element) && !element.polygon)) {
-    const tolerance = Math.max(
-      element.strokeWidth,
-      (element.strokeWidth * 2) / zoom,
-    );
-
-    // If the eraser movement is so fast that a large distance is covered
-    // between the last two points, the distanceToElement miss, so we test
-    // agaist each segment of the linear element
-    const segments = getElementLineSegments(element, elementsMap);
-    for (const seg of segments) {
-      if (lineSegmentsDistance(seg, pathSegment) <= tolerance) {
-        return true;
-      }
-    }
-
-    return false;
-  }
 
   return (
     intersectElementWithLineSegment(element, elementsMap, pathSegment, 0, true)
@@ -316,5 +259,79 @@ const eraserTest = (
         0,
         true,
       ).length > 0)
+  );
+};
+
+const isAnySegmentWithinTolerance = (
+  segments: readonly LineSegment<GlobalPoint>[],
+  pathSegment: LineSegment<GlobalPoint>,
+  tolerance: number,
+) =>
+  segments.some((seg) => lineSegmentsDistance(seg, pathSegment) <= tolerance);
+
+const toScenePoints = (
+  element: ExcalidrawElement,
+  points: readonly (readonly [number, number])[],
+) =>
+  points.map(([x, y]) => pointFrom<GlobalPoint>(element.x + x, element.y + y));
+
+// Freedraw elements are tested for erasure by measuring the distance
+// of the eraser path and the freedraw shape outline lines to a tolerance
+// which offers a good visual precision at various zoom levels
+const freedrawEraserTest = (
+  pathSegment: LineSegment<GlobalPoint>,
+  element: ExcalidrawFreeDrawElement,
+  elementsMap: ElementsMap,
+  zoom: number,
+): boolean => {
+  const outlinePoints = getFreedrawOutlinePoints(element);
+  const tolerance = Math.max(2.25, 5 / zoom); // NOTE: Visually fine-tuned approximation
+
+  // Very short, thin strokes can produce an empty outline (#11945), which
+  // getFreedrawOutlineAsSegments() rejects. Test the stroke's own points.
+  if (outlinePoints.length < 2) {
+    const points = toScenePoints(element, element.points);
+    const centerline = points.map((point, i) =>
+      lineSegment(point, points[i + 1] ?? point),
+    );
+    return isAnySegmentWithinTolerance(centerline, pathSegment, tolerance);
+  }
+
+  const strokeSegments = getFreedrawOutlineAsSegments(
+    element,
+    outlinePoints,
+    elementsMap,
+  );
+
+  if (isAnySegmentWithinTolerance(strokeSegments, pathSegment, tolerance)) {
+    return true;
+  }
+
+  const poly = polygon(...toScenePoints(element, outlinePoints));
+
+  // PERF: Check only one point of the eraser segment. If the eraser segment
+  // start is inside the closed freedraw shape, the other point is either also
+  // inside or the eraser segment will intersect the shape outline anyway
+  return polygonIncludesPointNonZero(pathSegment[0], poly);
+};
+
+const linearEraserTest = (
+  pathSegment: LineSegment<GlobalPoint>,
+  element: ExcalidrawElement,
+  elementsMap: ElementsMap,
+  zoom: number,
+): boolean => {
+  const tolerance = Math.max(
+    element.strokeWidth,
+    (element.strokeWidth * 2) / zoom,
+  );
+
+  // If the eraser movement is so fast that a large distance is covered
+  // between the last two points, the distanceToElement miss, so we test
+  // agaist each segment of the linear element
+  return isAnySegmentWithinTolerance(
+    getElementLineSegments(element, elementsMap),
+    pathSegment,
+    tolerance,
   );
 };

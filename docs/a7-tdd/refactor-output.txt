@@ -1,0 +1,13 @@
+$ git diff --name-only   (only production code changed; tests untouched)
+packages/excalidraw/eraser/index.ts
+
+$ yarn test:typecheck
+Done (no errors)
+
+$ yarn test:app --watch=false   (REFACTOR, commit A7-Refactor — whole suite)
+
+ ✓ packages/excalidraw/eraser/eraser.test.ts (27 tests) 58ms
+ Test Files  153 passed (153)
+      Tests  2738 passed | 47 skipped | 1 todo (2786)
+   Start at  21:22:44
+   Duration  63.35s (transform 5.71s, setup 28.40s, collect 127.93s, tests 217.54s, environment 37.21s, prepare 7.71s)
