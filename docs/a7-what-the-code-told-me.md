@@ -25,7 +25,7 @@ Same tool and config both times (`vitest.coverage.config.mts`, Vitest + V8, firs
 | Scope                | Metric    | Before (Part 1) | After      | Change    |
 | -------------------- | --------- | --------------- | ---------- | --------- |
 | **Whole project**    | **Lines** | **77.77%**      | **78.24%** | +0.47     |
-|                      | Branches  | 85.40%          | 85.48%     | +0.08     |
+|                      | Branches  | 85.40%          | 85.51%     | +0.11     |
 |                      | Functions | 73.52%          | 74.00%     | +0.48     |
 | `data/encryption.ts` | Lines     | 34.0%           | **100%**   | +66.0     |
 | `eraser/index.ts`    | Lines     | 20.7%           | **88.4%**  | +67.7     |
@@ -33,6 +33,8 @@ Same tool and config both times (`vitest.coverage.config.mts`, Vitest + V8, firs
 | `snapping.ts`        | Lines     | 42.9%           | 70.1%      | +27.2     |
 
 The project number barely moved, as the assignment predicted: the three files are about 2% of the measured lines.
+
+**A flaky test turned up.** One coverage run failed on `cropElement.test.tsx` "Preserve aspect ratio", code A7 never touched. The test picks a random scale (`Math.random()`, line 65) and then asserts exact float equality with `toBe` (line 388), so occasionally the last digit differs (`2.666666666666665` vs `2.6666666666666656`). It passed 6 reruns in a row. This is also why branch coverage reads 85.48% or 85.51% depending on the run. I left it unfixed because it is outside A7's scope; the fix would be a seeded scale or `toBeCloseTo`.
 
 The eraser's **branch** coverage _went down_ while its line coverage quadrupled. This is the V8 counting quirk from Part 1 happening live. Before, almost none of the eraser's functions ran, and V8 counts an unexecuted function as a single "covered" branch, so it reported 100%. Once the tests ran those functions, V8 could see their real branches, and some of them (restore mode on grouped bound text, rotated freedraw) are still untaken. The before figure was not a fact about the code; it was a fact about what V8 had not looked at yet.
 
