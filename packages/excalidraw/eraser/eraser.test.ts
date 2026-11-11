@@ -398,3 +398,62 @@ describe("EraserTrail — failure / no-op paths", () => {
     expect(t.addPointToPath(30, 50)).toEqual([]);
   });
 });
+
+// Regression: https://github.com/excalidraw/excalidraw/issues/11945
+// "Can't delete unlocked freedraw elements from the scene with the eraser".
+// Geometry and stroke options copied from the drawing linked in the issue:
+// very short constant-width strokes with stroke width 0.25. The outline
+// generator returns no points for them, and the eraser freedraw hit test throws
+// "Freepath outline must have at least 2 points".
+describe("EraserTrail — tiny thin freedraw strokes (#11945)", () => {
+  const tinyStroke = (id: string, x = 0, y = 0) =>
+    API.createElement({
+      type: "freedraw",
+      id,
+      x,
+      y,
+      width: 0.5714285714285552,
+      height: 0.5714285714284415,
+      strokeWidth: 0.25,
+      strokeOptions: { variability: "constant", streamline: 0.5 },
+      points: [
+        pointFrom<LocalPoint>(0, 0),
+        pointFrom<LocalPoint>(0.5714285714285552, -0.5714285714284415),
+        pointFrom<LocalPoint>(0.5714285714285552, -0.5714285714284415),
+      ],
+    });
+
+  it("givenTinyThinFreedrawStroke_whenEraserSwipesThroughIt_erasesIt", () => {
+    const t = createTrail([tinyStroke("dot")]);
+
+    expect(
+      erase(t, [
+        [-30, 0],
+        [30, 0],
+      ]),
+    ).toEqual(["dot"]);
+  });
+
+  it("givenTinyThinFreedrawStrokeNextToRectangle_whenSwipeCrossesBoth_erasesBoth", () => {
+    const r = rect({ id: "r" });
+    const t = createTrail([r, tinyStroke("dot", 110, 50)]);
+
+    expect(
+      erase(t, [
+        [80, 50],
+        [130, 50],
+      ]).sort(),
+    ).toEqual(["dot", "r"]);
+  });
+
+  it("givenTinyThinFreedrawStroke_whenEraserPassesFarAway_doesNotEraseIt", () => {
+    const t = createTrail([tinyStroke("dot")]);
+
+    expect(
+      erase(t, [
+        [-30, 12],
+        [30, 12],
+      ]),
+    ).toEqual([]);
+  });
+});
