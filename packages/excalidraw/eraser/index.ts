@@ -236,12 +236,28 @@ const eraserTest = (
   // which offers a good visual precision at various zoom levels
   if (isFreeDrawElement(element)) {
     const outlinePoints = getFreedrawOutlinePoints(element);
+    const tolerance = Math.max(2.25, 5 / zoom); // NOTE: Visually fine-tuned approximation
+
+    // Very short, thin strokes can produce an empty outline (#11945), which
+    // getFreedrawOutlineAsSegments() rejects. Test the stroke's own points.
+    if (outlinePoints.length < 2) {
+      const points = element.points.map(([x, y]) =>
+        pointFrom<GlobalPoint>(element.x + x, element.y + y),
+      );
+      return points.some(
+        (point, i) =>
+          lineSegmentsDistance(
+            lineSegment(point, points[i + 1] ?? point),
+            pathSegment,
+          ) <= tolerance,
+      );
+    }
+
     const strokeSegments = getFreedrawOutlineAsSegments(
       element,
       outlinePoints,
       elementsMap,
     );
-    const tolerance = Math.max(2.25, 5 / zoom); // NOTE: Visually fine-tuned approximation
 
     for (const seg of strokeSegments) {
       if (lineSegmentsDistance(seg, pathSegment) <= tolerance) {

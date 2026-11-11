@@ -1,0 +1,10 @@
+$ yarn test:typecheck
+Done (no errors)
+
+$ yarn test:app --watch=false   (GREEN, commit A7-Green — whole suite)
+
+ ✓ packages/excalidraw/eraser/eraser.test.ts (27 tests) 39ms
+ Test Files  153 passed (153)
+      Tests  2738 passed | 47 skipped | 1 todo (2786)
+   Start at  21:20:51
+   Duration  64.70s (transform 5.87s, setup 28.66s, collect 127.88s, tests 224.63s, environment 38.83s, prepare 7.71s)
