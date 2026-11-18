@@ -123,6 +123,7 @@ import {
   isBindingElementType,
   isBoundToContainer,
   isFrameLikeElement,
+  isFreeDrawElement,
   isImageElement,
   isEmbeddableElement,
   isInitializedImageElement,
@@ -368,6 +369,7 @@ import { withBatchedUpdates, withBatchedUpdatesThrottled } from "../reactUtils";
 import { isOverScrollBars } from "../scene/scrollbars";
 import { LassoTrail } from "../lasso";
 import { EraserTrail } from "../eraser";
+import { applyPartialErase } from "../eraser/partialErase";
 import { getShortcutKey } from "../shortcut";
 
 import {
@@ -10132,7 +10134,13 @@ class App extends React.Component<AppProps, AppState> {
       const pointerEnd = this.lastPointerUpEvent || this.lastPointerMoveEvent;
 
       if (isEraserActive(this.state) && pointerStart && pointerEnd) {
+        const eraserPath = this.eraserTrail.getPath();
         this.eraserTrail.endPath();
+
+        if (this.state.eraserMode === "partial") {
+          this.partiallyEraseElements(eraserPath);
+          return;
+        }
 
         const draggedDistance = pointDistance(
           pointFrom(pointerStart.clientX, pointerStart.clientY),
@@ -10305,6 +10313,28 @@ class App extends React.Component<AppProps, AppState> {
       }
     });
   }
+
+  /**
+   * Partial eraser (docs/DESIGN.md): cuts the freedraw strokes under the
+   * eraser path and records the result as a single history entry.
+   */
+  private partiallyEraseElements = (eraserPath: readonly GlobalPoint[]) => {
+    this.elementsPendingErasure = new Set();
+
+    const nextElements = applyPartialErase(
+      this.scene.getElementsIncludingDeleted(),
+      new Set(
+        this.visibleElements.filter(isFreeDrawElement).map((el) => el.id),
+      ),
+      eraserPath,
+      this.state.zoom.value,
+    );
+
+    if (nextElements) {
+      this.store.scheduleCapture();
+      this.scene.replaceAllElements(nextElements);
+    }
+  };
 
   private restoreReadyToEraseElements = () => {
     this.elementsPendingErasure = new Set();

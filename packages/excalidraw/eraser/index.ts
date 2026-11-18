@@ -44,6 +44,8 @@ import type App from "../components/App";
 export class EraserTrail extends AnimatedTrail {
   private elementsToErase: Set<ExcalidrawElement["id"]> = new Set();
   private groupsToErase: Set<ExcalidrawElement["id"]> = new Set();
+  /** every point of the current gesture, in scene coordinates */
+  private path: GlobalPoint[] = [];
 
   constructor(app: App) {
     super(app, {
@@ -75,10 +77,18 @@ export class EraserTrail extends AnimatedTrail {
     this.endPath();
     super.startPath(x, y);
     this.elementsToErase.clear();
+    this.path = [pointFrom<GlobalPoint>(x, y)];
   }
 
   addPointToPath(x: number, y: number, restore = false) {
     super.addPointToPath(x, y);
+    this.path.push(pointFrom<GlobalPoint>(x, y));
+
+    // partial erasing is decided once, on pointer-up, from the whole path;
+    // marking whole elements as pending would preview the wrong outcome
+    if (this.app.state.eraserMode === "partial") {
+      return [];
+    }
 
     const elementsToEraser = this.updateElementsToBeErased(restore);
 
@@ -189,11 +199,17 @@ export class EraserTrail extends AnimatedTrail {
     return Array.from(this.elementsToErase);
   }
 
+  /** the current gesture's full path; read it before `endPath()` clears it */
+  getPath(): readonly GlobalPoint[] {
+    return this.path;
+  }
+
   endPath(): void {
     super.endPath();
     super.clearTrails();
     this.elementsToErase.clear();
     this.groupsToErase.clear();
+    this.path = [];
   }
 }
 

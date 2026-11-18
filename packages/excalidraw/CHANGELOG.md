@@ -13,6 +13,12 @@ Please add the latest change on the top under the correct section.
 
 ## Unreleased
 
+### Partial eraser for freedraw strokes (fork: `mendozaa0130/excalidraw`, see `docs/DESIGN.md`; addresses [#9199](https://github.com/excalidraw/excalidraw/issues/9199), [#4904](https://github.com/excalidraw/excalidraw/issues/4904))
+
+- New `appState.eraserMode: "element" | "partial"` (default `"element"`, stored in the browser, not in exported files). Clicking the eraser button while the eraser is active toggles it, as does "Toggle partial eraser" in the command palette; hosts can set it through `initialData.appState` or `updateScene`.
+- In `"partial"` mode the eraser cuts only the touched parts out of freedraw strokes: the stroke is replaced by its surviving pieces (new elements with new ids, same style, group, frame, link and `customData`), as one undo step. Other element types and locked strokes are not affected.
+- While the eraser is in `"partial"` mode the hint bar says so, instead of the whole-element eraser's "Hold Alt to revert…" hint, which doesn't apply to it.
+
 ### Minimap, zoom menu and `ui.disabled` (2026-11-12) [#12605](https://github.com/excalidraw/excalidraw/pull/12605), [#12606](https://github.com/excalidraw/excalidraw/pull/12606)
 
 - A toggleable minimap above the bottom-left canvas actions: drag its viewport (or press outside of it) to pan, wheel over it to zoom. Toggled from the footer button next to the zoom level, the Preferences menu, the command palette and the context menu; stored as `appState.minimapEnabled` (in the browser, not in exported files). Not shown on phones or in editors shorter than 500px.

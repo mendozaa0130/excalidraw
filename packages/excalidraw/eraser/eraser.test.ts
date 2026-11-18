@@ -26,10 +26,15 @@ import { EraserTrail } from "./index";
 
 import type App from "../components/App";
 
-const makeApp = (elements: ExcalidrawElement[], zoom = 1) =>
+const makeApp = (
+  elements: ExcalidrawElement[],
+  zoom = 1,
+  eraserMode: "element" | "partial" = "element",
+) =>
   ({
     visibleElements: elements,
     state: {
+      eraserMode,
       zoom: { value: zoom },
       theme: "light",
       scrollX: 0,
@@ -59,8 +64,12 @@ const erase = (
 };
 
 let trail: EraserTrail | null = null;
-const createTrail = (elements: ExcalidrawElement[], zoom = 1) => {
-  trail = new EraserTrail(makeApp(elements, zoom));
+const createTrail = (
+  elements: ExcalidrawElement[],
+  zoom = 1,
+  eraserMode: "element" | "partial" = "element",
+) => {
+  trail = new EraserTrail(makeApp(elements, zoom, eraserMode));
   return trail;
 };
 
@@ -455,5 +464,39 @@ describe("EraserTrail — tiny thin freedraw strokes (#11945)", () => {
         [30, 12],
       ]),
     ).toEqual([]);
+  });
+});
+
+describe("EraserTrail — partial mode", () => {
+  it("marks nothing for deletion, not even the hit element's group", () => {
+    // same scene and swipe as the group test above, which marks ["a", "b"]
+    const a = rect({ id: "a", groupIds: ["g1"] });
+    const b = rect({ id: "b", x: 500, groupIds: ["g1"] });
+    const t = createTrail([a, b], 1, "partial");
+
+    const result = erase(t, [
+      [-20, 50],
+      [20, 50],
+    ]);
+
+    expect(result).toEqual([]);
+  });
+
+  it("records every point of the gesture until the path ends", () => {
+    const t = createTrail([], 1, "partial");
+
+    erase(t, [
+      [0, 0],
+      [10, 0],
+      [20, 5],
+    ]);
+    expect(t.getPath()).toEqual([
+      [0, 0],
+      [10, 0],
+      [20, 5],
+    ]);
+
+    t.endPath();
+    expect(t.getPath()).toEqual([]);
   });
 });

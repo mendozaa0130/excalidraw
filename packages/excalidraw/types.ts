@@ -439,6 +439,12 @@ export interface AppState {
     type: "selection" | "lasso";
     initialized: boolean;
   };
+  /**
+   * What the eraser removes: `"element"` deletes every element it touches
+   * (default); `"partial"` cuts only the touched parts out of freedraw
+   * strokes and leaves other elements alone.
+   */
+  eraserMode: "element" | "partial";
 
   // Pen handling
   penMode: boolean;

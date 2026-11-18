@@ -370,6 +370,7 @@ function CommandPaletteInner({
         actionManager.actions.gridMode,
         actionManager.actions.minimap,
         actionManager.actions.objectsSnapMode,
+        actionManager.actions.eraserMode,
         actionManager.actions.showHints,
         actionManager.actions.toggleShortcuts,
         actionManager.actions.selectAll,

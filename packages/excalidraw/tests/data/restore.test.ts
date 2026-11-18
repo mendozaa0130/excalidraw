@@ -1657,3 +1657,43 @@ describe("restoreLibraryItems creation timestamps", () => {
     },
   );
 });
+
+describe("restoreAppState — eraserMode (partial eraser)", () => {
+  it("should default eraserMode to element", () => {
+    expect(restore.restoreAppState({}, null).eraserMode).toBe("element");
+  });
+
+  it("should keep a valid eraserMode", () => {
+    expect(
+      restore.restoreAppState({ eraserMode: "partial" }, null).eraserMode,
+    ).toBe("partial");
+  });
+
+  it("should keep the locally stored eraserMode", () => {
+    expect(
+      restore.restoreAppState({}, { eraserMode: "partial" }).eraserMode,
+    ).toBe("partial");
+  });
+
+  it("should replace an invalid eraserMode with the default", () => {
+    for (const bad of ["pixel", "", 1, null, { mode: "partial" }]) {
+      expect(
+        restore.restoreAppState({ eraserMode: bad as any }, null).eraserMode,
+      ).toBe("element");
+    }
+  });
+
+  it("should not serialize eraserMode", () => {
+    const appState = {
+      ...getDefaultAppState(),
+      eraserMode: "partial" as const,
+    };
+
+    expect(
+      JSON.parse(serializeAsJSON([], appState, {}, "local")).appState,
+    ).not.toHaveProperty("eraserMode");
+    expect(
+      JSON.parse(serializeAsJSON([], appState, {}, "database")).appState ?? {},
+    ).not.toHaveProperty("eraserMode");
+  });
+});

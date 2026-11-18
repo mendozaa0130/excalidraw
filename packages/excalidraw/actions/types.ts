@@ -64,6 +64,7 @@ export type ActionName =
   | "showHints"
   | "stats"
   | "minimap"
+  | "eraserMode"
   | "changeStrokeColor"
   | "changeBackgroundColor"
   | "changeBucketFillBackgroundColor"

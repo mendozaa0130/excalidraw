@@ -1371,6 +1371,17 @@ export const getFreedrawMaxStrokeRadius = (
     : element.strokeWidth * VARIABLE_WIDTH_FREEDRAW.SIZE_FACTOR + 3;
 
 /**
+ * Typical half-width of a freedraw stroke's ink around its centerline, i.e.
+ * the radius at full pressure. Unlike `getFreedrawMaxStrokeRadius()` this is
+ * not a conservative upper bound, so it suits callers that should match what
+ * the user sees (the partial eraser) rather than never miss (hit-testing).
+ */
+export const getFreedrawStrokeRadius = (element: ExcalidrawFreeDrawElement) =>
+  (element.strokeOptions?.variability === "constant"
+    ? element.strokeWidth * CONSTANT_WIDTH_FREEDRAW.SIZE_FACTOR
+    : element.strokeWidth * VARIABLE_WIDTH_FREEDRAW.SIZE_FACTOR) / 2;
+
+/**
  * The streamline-smoothed centerline the freedraw stroke is rendered
  * around, in element-local coordinates. Boundary-sensitive consumers (e.g.
  * bucket fill) should use this instead of `element.points`: raw input

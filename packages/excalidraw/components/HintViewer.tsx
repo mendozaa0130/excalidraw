@@ -65,6 +65,9 @@ const getHints = ({
   }
 
   if (isEraserActive(appState)) {
+    if (appState.eraserMode === "partial") {
+      return t("hints.eraserPartial");
+    }
     return t("hints.eraserRevert", {
       shortcut: getTaggedShortcutKey("Alt"),
     });

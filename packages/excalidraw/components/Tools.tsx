@@ -5,6 +5,7 @@ import { KEYS, capitalizeString } from "@excalidraw/common";
 
 import type { PointerType } from "@excalidraw/element/types";
 
+import { toggleEraserMode } from "../actions/actionToggleEraserMode";
 import { trackEvent } from "../analytics";
 import { t } from "../i18n";
 import { getShortcutKey } from "../shortcut";
@@ -31,6 +32,8 @@ import {
   EmbedIcon,
   stickyNoteToolIcon,
 } from "./icons";
+
+import type { TranslationKeys } from "../i18n";
 
 import type {
   AppClassProperties,
@@ -257,6 +260,8 @@ type ToolButtonBehavior = {
     app: AppClassProperties,
     data: { pointerType: PointerType | null },
   ) => void;
+  /** i18n key for the button's label, if it depends on app state */
+  getLabelKey?: (app: AppClassProperties) => TranslationKeys;
 };
 
 /**
@@ -277,7 +282,9 @@ const createToolButton = (
     hideKeyBinding,
     hideShortcut,
   }: ToolButtonComponentProps) => {
-    const label = capitalizeString(t(`toolBar.${type}`));
+    const label = capitalizeString(
+      t(behavior?.getLabelKey?.(app) ?? `toolBar.${type}`),
+    );
     const shortcut = hideShortcut ? null : getToolShortcut(shortcutType);
 
     return (
@@ -335,7 +342,29 @@ export const FreedrawToolButton = createToolButton("freedraw");
 export const TextToolButton = createToolButton("text");
 export const StickyNoteToolButton = createToolButton("stickynote");
 export const ImageToolButton = createToolButton("image");
-export const EraserToolButton = createToolButton("eraser");
+
+/**
+ * The eraser button — pointer-clicking it while the eraser is active toggles
+ * between whole-element and partial erasing (same gesture as selection ⇄
+ * lasso). Keyboard/AT activation only selects the tool.
+ */
+export const EraserToolButton = createToolButton("eraser", {
+  onSelect: (app, { pointerType }) => {
+    if (app.state.activeTool.type === "eraser" && pointerType !== null) {
+      app.syncActionResult(toggleEraserMode(app.state));
+      return;
+    }
+
+    if (app.state.activeTool.type !== "eraser") {
+      trackEvent("toolbar", "eraser", "ui");
+      app.setActiveTool({ type: "eraser" });
+    }
+  },
+  getLabelKey: (app) =>
+    app.state.eraserMode === "partial"
+      ? "toolBar.eraserPartial"
+      : "toolBar.eraser",
+});
 export const FrameToolButton = createToolButton("frame");
 
 /**

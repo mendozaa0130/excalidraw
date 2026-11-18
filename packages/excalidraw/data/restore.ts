@@ -1331,6 +1331,15 @@ export const restoreAppState = (
   };
   nextAppState.fontTopPicks = restoreFontTopPicks(nextAppState.fontTopPicks);
 
+  // imported/stored data is untrusted: anything unknown falls back to the
+  // default, which is the original whole-element eraser
+  if (
+    nextAppState.eraserMode !== "element" &&
+    nextAppState.eraserMode !== "partial"
+  ) {
+    nextAppState.eraserMode = defaultAppState.eraserMode;
+  }
+
   // legacy
   if ((appState as any).currentItemStrokeWidth !== undefined) {
     nextAppState.currentItemStrokeWidthKey =
