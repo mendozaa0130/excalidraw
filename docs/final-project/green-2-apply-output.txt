@@ -1,0 +1,10 @@
+
+ RUN  v3.0.6 /Users/alejandramendoza/excalidraw
+
+ ✓ packages/excalidraw/eraser/partialErase.test.ts (11 tests) 7ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  17:28:17
+   Duration  2.88s (transform 1.66s, setup 190ms, collect 2.22s, tests 7ms, environment 243ms, prepare 52ms)
+

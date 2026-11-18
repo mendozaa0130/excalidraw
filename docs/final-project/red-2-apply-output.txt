@@ -1,0 +1,141 @@
+
+ RUN  v3.0.6 /Users/alejandramendoza/excalidraw
+
+ ❯ packages/excalidraw/eraser/partialErase.test.ts (11 tests | 6 failed) 10ms
+   × applyPartialErase — normal behaviour > givenStrokeCutInMiddle_whenApplied_originalIsDeletedAndTwoFragmentsAdded 3ms
+     → Cannot read properties of null (reading 'find')
+   × applyPartialErase — normal behaviour > givenStyledStroke_whenCut_fragmentsCopyStyleGroupsFrameLinkAndCustomData 3ms
+     → expected undefined to match object { strokeColor: '#e03131', …(11) }
+   × applyPartialErase — normal behaviour > givenStrokeBetweenTwoOthers_whenCut_fragmentsKeepItsZPosition 1ms
+     → expected [] to deeply equal [ 'below', 'fragment', …(2) ]
+   × applyPartialErase — normal behaviour > givenStrokeFullyCovered_whenApplied_isDeletedWithNoFragments 1ms
+     → Target cannot be null or undefined.
+   ✓ applyPartialErase — what it must not touch > givenNonFreedrawCandidate_whenApplied_isLeftUntouched
+   ✓ applyPartialErase — what it must not touch > givenLockedStroke_whenApplied_isLeftUntouched
+   ✓ applyPartialErase — what it must not touch > givenStrokeNotInCandidates_whenEraserCrossesIt_isLeftUntouched
+   × applyPartialErase — what it must not touch > givenGroupedStrokes_whenOneIsCut_theOtherGroupMemberSurvivesUnchanged 0ms
+     → Cannot read properties of null (reading 'find')
+   ✓ applyPartialErase — what it must not touch > givenEraserMissesCandidate_whenApplied_returnsNull
+   ✓ applyPartialErase — what it must not touch > givenAlreadyDeletedStroke_whenApplied_isIgnored
+   × applyPartialErase — tolerance > givenThickerStroke_whenEraserPassesNearTheInkEdge_stillCuts 0ms
+     → expected null not to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/excalidraw/eraser/partialErase.test.ts > applyPartialErase — normal behaviour > givenStrokeCutInMiddle_whenApplied_originalIsDeletedAndTwoFragmentsAdded
+TypeError: Cannot read properties of null (reading 'find')
+ ❯ packages/excalidraw/eraser/partialErase.test.ts:63:19
+     61|     const result = applyPartialErase(scene(s), ids(s), swipeAt(50), 1)…
+     62| 
+     63|     expect(result.find((e) => e.id === s.id)?.isDeleted).toBe(true);
+       |                   ^
+     64|     const fragments = live(result);
+     65|     expect(fragments).toHaveLength(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  packages/excalidraw/eraser/partialErase.test.ts > applyPartialErase — normal behaviour > givenStyledStroke_whenCut_fragmentsCopyStyleGroupsFrameLinkAndCustomData
+AssertionError: expected undefined to match object { strokeColor: '#e03131', …(11) }
+
+- Expected: 
+{
+  "angle": 0,
+  "backgroundColor": "#ffc9c9",
+  "customData": {
+    "tag": "kept",
+  },
+  "frameId": "frame-1",
+  "groupIds": [
+    "g1",
+  ],
+  "link": "https://example.com",
+  "opacity": 60,
+  "roughness": 2,
+  "simulatePressure": true,
+  "strokeColor": "#e03131",
+  "strokeOptions": {
+    "streamline": 0.3,
+    "variability": "constant",
+  },
+  "strokeWidth": 4,
+}
+
++ Received: 
+undefined
+
+ ❯ packages/excalidraw/eraser/partialErase.test.ts:88:20
+     86|     const copied = f as ExcalidrawFreeDrawElement;
+     87| 
+     88|     expect(copied).toMatchObject({
+       |                    ^
+     89|       strokeColor: "#e03131",
+     90|       backgroundColor: "#ffc9c9",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  packages/excalidraw/eraser/partialErase.test.ts > applyPartialErase — normal behaviour > givenStrokeBetweenTwoOthers_whenCut_fragmentsKeepItsZPosition
+AssertionError: expected [] to deeply equal [ 'below', 'fragment', …(2) ]
+
+- Expected
++ Received
+
+- [
+-   "below",
+-   "fragment",
+-   "fragment",
+-   "above",
+- ]
++ []
+
+ ❯ packages/excalidraw/eraser/partialErase.test.ts:119:19
+    117|     );
+    118| 
+    119|     expect(order).toEqual(["below", "fragment", "fragment", "above"]);
+       |                   ^
+    120|     expect(() =>
+    121|       validateFractionalIndices(result, {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  packages/excalidraw/eraser/partialErase.test.ts > applyPartialErase — normal behaviour > givenStrokeFullyCovered_whenApplied_isDeletedWithNoFragments
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/excalidraw/eraser/partialErase.test.ts:135:20
+    133| 
+    134|     expect(live(result)).toHaveLength(0);
+    135|     expect(result).toHaveLength(1);
+       |                    ^
+    136|   });
+    137| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  packages/excalidraw/eraser/partialErase.test.ts > applyPartialErase — what it must not touch > givenGroupedStrokes_whenOneIsCut_theOtherGroupMemberSurvivesUnchanged
+TypeError: Cannot read properties of null (reading 'find')
+ ❯ packages/excalidraw/eraser/partialErase.test.ts:169:19
+    167|     const result = applyPartialErase(scene(a, b), ids(a, b), swipeAt(5…
+    168| 
+    169|     expect(result.find((e) => e.id === b.id)).toBe(b);
+       |                   ^
+    170|   });
+    171| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  packages/excalidraw/eraser/partialErase.test.ts > applyPartialErase — tolerance > givenThickerStroke_whenEraserPassesNearTheInkEdge_stillCuts
+AssertionError: expected null not to be null
+ ❯ packages/excalidraw/eraser/partialErase.test.ts:190:74
+    188|     const nearEdge = [pointFrom<GlobalPoint>(40, 9), pointFrom<GlobalP…
+    189| 
+    190|     expect(applyPartialErase(scene(thick), ids(thick), nearEdge, 1)).n…
+       |                                                                          ^
+    191|     expect(applyPartialErase(scene(thin), ids(thin), nearEdge, 1)).toB…
+    192|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 5 passed (11)
+   Start at  17:27:59
+   Duration  3.57s (transform 2.02s, setup 247ms, collect 2.80s, tests 10ms, environment 264ms, prepare 41ms)
+

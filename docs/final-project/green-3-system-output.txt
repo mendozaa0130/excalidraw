@@ -1,0 +1,13 @@
+
+ RUN  v3.0.6 /Users/alejandramendoza/excalidraw
+
+ ✓ packages/element/tests/freedrawSplit.test.ts (15 tests) 8ms
+ ✓ packages/excalidraw/eraser/partialErase.test.ts (11 tests) 8ms
+ ✓ packages/excalidraw/eraser/eraser.test.ts (27 tests) 19ms
+ ✓ packages/excalidraw/tests/partialEraser.test.tsx (7 tests) 718ms
+
+ Test Files  4 passed (4)
+      Tests  60 passed (60)
+   Start at  17:31:50
+   Duration  3.41s (transform 1.89s, setup 831ms, collect 6.73s, tests 752ms, environment 840ms, prepare 191ms)
+

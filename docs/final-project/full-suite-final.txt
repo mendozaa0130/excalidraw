@@ -1,0 +1,408 @@
+
+ RUN  v3.0.6 /Users/alejandramendoza/excalidraw
+
+stderr | packages/element/src/__tests__/transform.test.ts > Test Transform > Test arrow bindings > should bind arrows to existing elements if ids are correct
+No element for end binding with id rect-11 found
+
+ ✓ packages/element/src/__tests__/transform.test.ts (48 tests) 117ms
+stderr | packages/excalidraw/tests/data/restore.test.ts > restoreElements > should strip element if restore fails
+Error restoring element: Error: FORBIDDEN!
+    at Object.get [as seed] (/Users/alejandramendoza/excalidraw/packages/excalidraw/tests/data/restore.test.ts:614:15)
+    at restoreElement (/Users/alejandramendoza/excalidraw/packages/excalidraw/data/restore.ts:552:3)
+    at /Users/alejandramendoza/excalidraw/packages/excalidraw/data/restore.ts:988:27
+    at Array.reduce (<anonymous>)
+    at Module.restoreElements (/Users/alejandramendoza/excalidraw/packages/excalidraw/data/restore.ts:980:28)
+    at /Users/alejandramendoza/excalidraw/packages/excalidraw/tests/data/restore.test.ts:618:38
+    at file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:174:14
+    at file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:558:28
+    at file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:61:24
+    at new Promise (<anonymous>)
+
+stderr | packages/excalidraw/tests/data/restore.test.ts > repairing bindings > should strip arrow binding if repair throws
+Could not repair binding for element "undefined" out of (undefined) elements
+
+ ✓ packages/excalidraw/tests/data/restore.test.ts (75 tests) 84ms
+stderr | packages/element/tests/linearElementEditor.test.tsx > Test Linear Elements > should normalize the element points at creation
+Linear element is not normalized Error: 
+    at new LinearElementEditor (/Users/alejandramendoza/excalidraw/packages/element/src/linearElementEditor.ts:191:57)
+    at /Users/alejandramendoza/excalidraw/packages/element/tests/linearElementEditor.test.tsx:185:5
+    at file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:174:14
+    at file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:558:28
+    at file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:61:24
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:41:12)
+    at runTest (file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:1137:17)
+    at runSuite (file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:1291:15)
+    at runSuite (file:///Users/alejandramendoza/excalidraw/node_modules/@vitest/runner/dist/index.js:1291:15)
+
+ ✓ packages/element/tests/bucketFill.test.ts (57 tests) 422ms
+stderr | packages/excalidraw/tests/history.test.tsx > image insertion > passes host-configured max image dimensions to the resize helper
+Error: Image cache update resulted with an error.
+    at /Users/alejandramendoza/excalidraw/packages/excalidraw/components/App.tsx:10519:21
+
+stderr | packages/excalidraw/tests/lasso.test.tsx > Special cases > respects boxSelectionMode ('contain' vs 'overlap') during lasso selection
+<<< WARNING: test "Special cases > respects boxSelectionMode ('contain' vs 'overlap') during lasso selection" does not wrap some state update in act() >>>
+
+ ✓ packages/excalidraw/tests/lasso.test.tsx (17 tests) 1777ms
+stderr | packages/excalidraw/wysiwyg/textWysiwyg.test.tsx > textWysiwyg > Test container-unbound text > should commit text before saving via 'Cmd/Ctrl+S'
+<<< WARNING: test "textWysiwyg > Test container-unbound text > should commit text before saving via 'Cmd/Ctrl+S'" does not wrap some state update in act() >>>
+
+stderr | packages/excalidraw/wysiwyg/textWysiwyg.test.tsx > textWysiwyg > Test container-unbound text > should commit text before saving via 'Cmd/Ctrl+Shift+S'
+<<< WARNING: test "textWysiwyg > Test container-unbound text > should commit text before saving via 'Cmd/Ctrl+Shift+S'" does not wrap some state update in act() >>>
+
+stderr | packages/excalidraw/tests/interactivity.test.tsx > interaction={{ enabled: { tools } }} > pointer input stays inert when the active tool is not enabled
+"custom" tool cannot be activated while the editor is non-interactive (see "interaction.enabled.tools")
+
+stderr | packages/excalidraw/tests/interactivity.test.tsx > interaction={{ enabled: { tools } }} > setActiveTool only activates enabled tools while non-interactive
+"rectangle" tool cannot be activated while the editor is non-interactive (see "interaction.enabled.tools")
+"hand" tool cannot be activated while the editor is non-interactive (see "interaction.enabled.tools")
+
+stderr | packages/excalidraw/tests/interactivity.test.tsx > interaction={{ enabled: { tools } }} > interaction={false} refuses tool switching and keeps the laser inert
+"laser" tool cannot be activated while the editor is non-interactive (see "interaction.enabled.tools")
+
+ ✓ packages/excalidraw/tests/selection.test.tsx (68 tests | 1 skipped) 6338ms
+   ✓ box-selection > should allow adding to selection via box-select when holding shift 335ms
+ ✓ packages/excalidraw/tests/interactivity.test.tsx (60 tests) 4524ms
+ ✓ packages/element/tests/linearElementEditor.test.tsx (60 tests | 1 skipped) 7716ms
+   ✓ Test Linear Elements > should not drag line and add midpoint until dragged beyond a threshold 337ms
+stderr | packages/element/tests/resize.test.tsx > line element > resizes
+<<< WARNING: test "line element > resizes" does not wrap some state update in act() >>>
+
+stderr | packages/element/tests/resize.test.tsx > line element > flips while resizing
+<<< WARNING: test "line element > flips while resizing" does not wrap some state update in act() >>>
+
+ ✓ packages/element/tests/frame.test.tsx (72 tests | 30 skipped) 5178ms
+   ✓ arrows in frames > should not clip an arrow, nor its label, to its frame 644ms
+stderr | packages/element/tests/resize.test.tsx > line element > resizes from center
+<<< WARNING: test "line element > resizes from center" does not wrap some state update in act() >>>
+
+stderr | packages/element/tests/zindex.test.tsx > z-index manipulation > send back
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+
+stderr | packages/element/tests/zindex.test.tsx > z-index manipulation > bring forward
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+
+ ✓ packages/excalidraw/tests/renderOverrides.test.tsx (54 tests) 1708ms
+stderr | packages/element/tests/zindex.test.tsx > z-index manipulation > group-selected duplication should includes deleted elements that weren't selected on account of being deleted
+[NONDELETED][INVARIANT] Element to duplicate should be non-deleted
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+[NONDELETED][INVARIANT] getSelectedElements skipping deleted selected element which should not be in the selection
+
+ ✓ packages/excalidraw/tests/history.test.tsx (71 tests | 1 skipped) 10461ms
+   ✓ history > singleplayer undo/redo > should support linear element creation and points manipulation through the editor 304ms
+   ✓ history > multiplayer undo/redo > conflicts in arrows and their bindable elements > should rebind bindings when both are updated through the history and the arrow got bound to a different element in the meantime 332ms
+stderr | packages/excalidraw/tests/scrollConstraints.test.tsx > rubberband overscroll (integration) > allows simultaneous pinch-zoom and rubberband pan on touch
+An update (setState, replaceState, or forceUpdate) was scheduled from inside an update function. Update functions should be pure, with zero side-effects. Consider using componentDidUpdate or a callback.
+
+Please update the following component: App
+
+ ✓ packages/element/src/__tests__/stickyNote.test.ts (48 tests) 153ms
+ ✓ packages/excalidraw/tests/scrollConstraints.test.tsx (40 tests) 1896ms
+   ✓ rubberband overscroll (integration) > continues rubberband snap-back while wheel-zooming 355ms
+ ✓ packages/excalidraw/charts.test.ts (47 tests) 180ms
+stderr | packages/excalidraw/wysiwyg/textWysiwyg.test.tsx > textWysiwyg > Test container-bound text > should bind text to container when triggered via context menu
+flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+
+ ✓ packages/element/tests/zindex.test.tsx (20 tests) 3625ms
+   ✓ z-index manipulation > send back 917ms
+   ✓ z-index manipulation > duplicating elements should retain zindex integrity 317ms
+ ✓ packages/element/tests/resize.test.tsx (66 tests | 2 skipped) 11737ms
+   ✓ generic element > resizes > with handle 'n' 346ms
+   ✓ multiple selection > resizes with labeled arrows 514ms
+   ✓ multiple selection > flips while resizing 664ms
+ ✓ packages/excalidraw/tests/stickyNotes.test.tsx (37 tests) 4632ms
+   ✓ sticky notes > keeps arrows bound to a note attached while typing grows it 366ms
+stderr | packages/excalidraw/tests/regressionTests.test.tsx > regression tests > pinch-to-zoom works
+An update (setState, replaceState, or forceUpdate) was scheduled from inside an update function. Update functions should be pure, with zero side-effects. Consider using componentDidUpdate or a callback.
+
+Please update the following component: App
+
+stderr | packages/element/tests/duplicate.test.tsx > duplicating list items > advances the marker of a rectangle label "9. foo"
+<<< WARNING: test "duplicating list items > advances the marker of a rectangle label "9. foo"" does not wrap some state update in act() >>>
+
+stderr | packages/element/tests/duplicate.test.tsx > duplicating list items > advances the marker of a stickynote label "9. foo"
+<<< WARNING: test "duplicating list items > advances the marker of a stickynote label "9. foo"" does not wrap some state update in act() >>>
+
+stderr | packages/element/tests/duplicate.test.tsx > duplicating list items > advances the marker of a ellipse label "3"
+<<< WARNING: test "duplicating list items > advances the marker of a ellipse label "3"" does not wrap some state update in act() >>>
+
+stderr | packages/element/tests/binding.test.tsx > binding to a point-like (sub-pixel) element > simple arrow binds to the center and stays put when the element grows
+<<< WARNING: test "binding to a point-like (sub-pixel) element > simple arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+<<< WARNING: test "binding to a point-like (sub-pixel) element > simple arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+<<< WARNING: test "binding to a point-like (sub-pixel) element > simple arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+<<< WARNING: test "binding to a point-like (sub-pixel) element > simple arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+
+stderr | packages/element/tests/binding.test.tsx > binding to a point-like (sub-pixel) element > elbow arrow binds to the center and stays put when the element grows
+<<< WARNING: test "binding to a point-like (sub-pixel) element > elbow arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+<<< WARNING: test "binding to a point-like (sub-pixel) element > elbow arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+<<< WARNING: test "binding to a point-like (sub-pixel) element > elbow arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+<<< WARNING: test "binding to a point-like (sub-pixel) element > elbow arrow binds to the center and stays put when the element grows" does not wrap some state update in act() >>>
+
+ ✓ packages/element/tests/binding.test.tsx (34 tests | 1 skipped) 4770ms
+   ✓ binding for simple arrows > when both endpoints are bound inside the same element > should create an `inside` binding 542ms
+   ✓ binding for simple arrows > self-binding (both ends to the same element) single-click finalize > orbit -> orbit finalizes on a single click 314ms
+ ✓ packages/element/tests/duplicate.test.tsx (74 tests) 6681ms
+   ✓ group-related duplication > action-duplicating within group 347ms
+ ✓ packages/element/tests/delta.test.tsx (29 tests) 25ms
+ ✓ packages/excalidraw/tests/arrowEndpointTextBinding.test.tsx (46 tests) 5108ms
+ ✓ packages/excalidraw/tests/regressionTests.test.tsx (51 tests) 7880ms
+   ✓ regression tests > draw every type of shape 949ms
+   ✓ regression tests > Cmd/Ctrl-click exclusively select element under pointer 309ms
+stderr | packages/excalidraw/wysiwyg/textWysiwyg.test.tsx > textWysiwyg > Test container-bound text > should reset the text element angle to the container's when binding to rotated non-arrow container
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to the container's when binding to rotated non-arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to the container's when binding to rotated non-arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to the container's when binding to rotated non-arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to the container's when binding to rotated non-arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to the container's when binding to rotated non-arrow container" does not wrap some state update in act() >>>
+
+stderr | packages/excalidraw/wysiwyg/textWysiwyg.test.tsx > textWysiwyg > Test container-bound text > should reset the text element angle to 0 when binding to rotated arrow container
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to 0 when binding to rotated arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to 0 when binding to rotated arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to 0 when binding to rotated arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to 0 when binding to rotated arrow container" does not wrap some state update in act() >>>
+<<< WARNING: test "textWysiwyg > Test container-bound text > should reset the text element angle to 0 when binding to rotated arrow container" does not wrap some state update in act() >>>
+
+ ✓ packages/element/tests/align.test.tsx (50 tests) 8929ms
+   ✓ aligning > aligns two objects correctly to the top 397ms
+   ✓ aligning > aligns two objects correctly to the bottom 327ms
+   ✓ aligning > aligns nested group and other element correctly to the top 327ms
+ ✓ packages/element/tests/collision.test.tsx (42 tests) 653ms
+ ✓ packages/excalidraw/tests/scene/export.test.ts (32 tests) 7120ms
+   ✓ exportToSvg > with default arguments 389ms
+   ✓ exportToSvg > with a CJK font 5655ms
+stderr | packages/excalidraw/tests/clipboard.test.tsx > clipboard - pasting mermaid definition > should paste as normal text if invalid mermaid
+parsing pasted text as mermaid definition failed: ERROR
+
+stderr | packages/excalidraw/tests/clipboard.test.tsx > copy and cut events > should copy the selection on a copy event, and cut it on a cut event
+<<< WARNING: test "copy and cut events > should copy the selection on a copy event, and cut it on a cut event" does not wrap some state update in act() >>>
+<<< WARNING: test "copy and cut events > should copy the selection on a copy event, and cut it on a cut event" does not wrap some state update in act() >>>
+
+ ✓ packages/excalidraw/wysiwyg/textWysiwyg.test.tsx (163 tests | 1 skipped) 24386ms
+   ✓ textWysiwyg > start text editing > should prefer editing selected text element (non-bindable container present) 330ms
+   ✓ textWysiwyg > Test container-bound text > should respect text alignment when resizing 623ms
+   ✓ textWysiwyg > Test container-bound text > undo should work 393ms
+   ✓ textWysiwyg > Test container-bound text > should reselect 'container' after deleting bound text with escape 358ms
+ ✓ packages/excalidraw/tests/clipboard.test.tsx (31 tests) 3312ms
+ ✓ packages/excalidraw/tests/flip.test.tsx (46 tests | 8 skipped) 4053ms
+   ✓ rectangle > flips an unrotated rectangle horizontally correctly 306ms
+   ✓ mutliple elements > with bound text flip correctly 319ms
+ ✓ packages/element/tests/textWrapping.test.ts (51 tests) 14ms
+ ✓ packages/excalidraw/components/Stats/stats.test.tsx (20 tests) 2398ms
+   ✓ binding with linear elements > should remain bound to linear element on small position change 366ms
+ ✓ packages/element/tests/flowchart.test.tsx (20 tests) 3435ms
+ ✓ packages/excalidraw/tests/bucketFill.test.tsx (31 tests) 2598ms
+ ✓ packages/excalidraw/tests/onDuplicate.test.tsx (25 tests) 1764ms
+ ✓ packages/excalidraw/tests/drawShape.test.tsx (36 tests) 3318ms
+ ✓ packages/excalidraw/tests/wrap.test.tsx (24 tests) 2494ms
+ ✓ packages/excalidraw/tests/dragCreate.test.tsx (19 tests) 1985ms
+ ✓ packages/excalidraw/tests/arrowBinding.test.tsx (24 tests) 2136ms
+stderr | packages/element/tests/elbowArrow.test.tsx > elbow arrow routing > can move an elbow arrow to the origin while routing it
+<<< WARNING: test "elbow arrow routing > can move an elbow arrow to the origin while routing it" does not wrap some state update in act() >>>
+
+stderr | packages/element/tests/elbowArrow.test.tsx > elbow arrow routing > can generate proper points for bound elbow arrow
+<<< WARNING: test "elbow arrow routing > can generate proper points for bound elbow arrow" does not wrap some state update in act() >>>
+<<< WARNING: test "elbow arrow routing > can generate proper points for bound elbow arrow" does not wrap some state update in act() >>>
+<<< WARNING: test "elbow arrow routing > can generate proper points for bound elbow arrow" does not wrap some state update in act() >>>
+<<< WARNING: test "elbow arrow routing > can generate proper points for bound elbow arrow" does not wrap some state update in act() >>>
+<<< WARNING: test "elbow arrow routing > can generate proper points for bound elbow arrow" does not wrap some state update in act() >>>
+
+ ✓ packages/excalidraw/components/TTDDialog/utils/chat.test.ts (27 tests) 12ms
+ ✓ packages/element/tests/cropElement.test.tsx (17 tests) 1792ms
+ ✓ packages/element/tests/fractionalIndex.test.ts (54 tests) 4114ms
+   ✓ sync invalid indices with array order > should be able to sync 20K invalid indices > should sync all empty indices > should sync invalid indices of moved elements or fallback 532ms
+   ✓ sync invalid indices with array order > should be able to sync 20K invalid indices > should sync all empty indices > should sync invalid indices of all elements 765ms
+   ✓ sync invalid indices with array order > should be able to sync 20K invalid indices > should sync all but last index given a growing array of indices > should sync invalid indices of moved elements or fallback 779ms
+   ✓ sync invalid indices with array order > should be able to sync 20K invalid indices > should sync all but last index given a growing array of indices > should sync invalid indices of all elements 706ms
+   ✓ sync invalid indices with array order > should be able to sync 20K invalid indices > should sync all but first index given a declining array of indices > should sync invalid indices of moved elements or fallback 667ms
+   ✓ sync invalid indices with array order > should be able to sync 20K invalid indices > should sync all but first index given a declining array of indices > should sync invalid indices of all elements 653ms
+stderr | packages/excalidraw/tests/hostAbstraction.test.tsx > headless (server-side) export > renders a scene with no browser globals, through an injected environment
+Excalidraw: there is no font set (`document.fonts`, or a worker's `self.fonts`) to load the exported fonts into, so text is measured and drawn with whatever fonts this environment has. Load them yourself in `config.environment.loadFonts`.
+
+ ✓ packages/excalidraw/tests/hostAbstraction.test.tsx (3 tests) 578ms
+stderr | packages/element/tests/elbowArrow.test.tsx > elbow arrow routes with one or two corners > connects elements with a single corner when a fixed segment lines up with the start
+<<< WARNING: test "elbow arrow routes with one or two corners > connects elements with a single corner when a fixed segment lines up with the start" does not wrap some state update in act() >>>
+
+ ✓ packages/excalidraw/components/TTDDialog/utils/TTDstreamFetch.test.ts (21 tests) 11ms
+ ✓ packages/element/tests/elbowArrow.test.tsx (20 tests) 3764ms
+   ✓ elbow arrow segment move > can move the second segment of a fully connected elbow arrow 560ms
+ ✓ packages/excalidraw/tests/contextmenu.test.tsx (17 tests) 2560ms
+   ✓ contextMenu element > selecting 'Paste styles' in context menu pastes styles 349ms
+ ✓ packages/excalidraw/tests/excalidraw.test.tsx (31 tests) 2523ms
+ ✓ packages/excalidraw/snapping.test.ts (30 tests) 8ms
+ ✓ packages/excalidraw/tests/minimap.test.tsx (14 tests) 1879ms
+   ✓ minimap > keeps panning while the pointer is held outside of the minimap 801ms
+ ✓ packages/excalidraw/actions/actionDuplicateSelection.test.tsx (17 tests) 1473ms
+ ✓ packages/excalidraw/tests/wheel.test.tsx (26 tests) 1986ms
+   ✓ wheel navigation > wheel button held down > while moving the pointer between zooms > keeps drawing from zoom-scaled bitmaps until the gesture is over 371ms
+ ✓ packages/excalidraw/eraser/eraser.test.ts (29 tests) 20ms
+stderr | packages/excalidraw/tests/tool.test.tsx > props.activeTool (forced tool) > ignores user & API tool switching without side effects
+"rectangle" tool activation ignored — the active tool is controlled by the host via "props.activeTool"
+"freedraw" tool activation ignored — the active tool is controlled by the host via "props.activeTool"
+
+stderr | packages/excalidraw/tests/tool.test.tsx > props.activeTool (forced tool) > composes with interaction.enabled.tools (presenter → viewer)
+"selection" tool cannot be activated while the editor is non-interactive (see "interaction.enabled.tools")
+
+ ✓ packages/excalidraw/tests/pixelSnap.test.tsx (15 tests) 1526ms
+ ✓ packages/excalidraw/tests/tool.test.tsx (21 tests) 1230ms
+ ✓ packages/utils/tests/export.test.ts (19 tests) 124ms
+ ✓ packages/excalidraw/tests/library.test.tsx (9 tests) 924ms
+ ✓ packages/excalidraw/components/Sidebar/Sidebar.test.tsx (12 tests) 806ms
+ ✓ packages/excalidraw/tests/colorInput.test.tsx (30 tests) 2061ms
+   ✓ ColorInput error handling > shows error for invalid hex length (too short) 326ms
+ ✓ packages/excalidraw/tests/data/reconcile.test.ts (2 tests) 12ms
+ ✓ packages/element/tests/textElement.test.ts (28 tests) 6ms
+ ✓ packages/excalidraw/components/TTDDialog/utils/mermaidAutoFix.test.ts (19 tests) 14ms
+ ✓ packages/element/tests/recognizeShape.test.ts (21 tests) 73ms
+ ✓ packages/element/tests/sortElements.test.ts (4 tests | 2 skipped) 11ms
+ ✓ packages/excalidraw/tests/fileDrop.test.tsx (27 tests) 1902ms
+ ✓ packages/common/src/colors.test.ts (65 tests) 8ms
+ ✓ packages/element/tests/bounds.test.ts (18 tests) 16ms
+ ✓ packages/excalidraw/tests/elementLocking.test.tsx (15 tests) 1564ms
+ ✓ packages/element/tests/freedrawSplit.test.ts (16 tests) 164ms
+ ✓ packages/element/tests/embeddable.test.ts (19 tests) 11ms
+ ✓ packages/excalidraw/tests/fitToContent.test.tsx (10 tests) 1192ms
+ ✓ packages/excalidraw/tests/crossDocument.test.tsx (3 tests) 405ms
+ ✓ packages/excalidraw/tests/renderCaches.test.ts (4 tests) 26ms
+ ✓ packages/excalidraw/components/TTDDialog/utils/mermaidError.test.ts (29 tests) 5ms
+ ✓ packages/excalidraw/components/TTDDialog/utils/mermaidValidation.test.ts (31 tests) 4ms
+ ✓ packages/excalidraw/data/encryption.test.ts (21 tests) 484ms
+   ✓ encryptData / decryptData > givenLargePayload_whenEncryptedThenDecrypted_roundTripsByteForByte 468ms
+ ✓ packages/excalidraw/tests/tooltip.test.tsx (8 tests) 39ms
+ ✓ excalidraw-app/tests/collab.test.tsx (2 tests) 325ms
+ ✓ packages/excalidraw/tests/laser.test.tsx (9 tests) 1409ms
+ ✓ packages/excalidraw/actions/actionProperties.test.tsx (14 tests) 1332ms
+ ✓ packages/excalidraw/tests/move.test.tsx (4 tests) 938ms
+   ✓ move element > rectangle 314ms
+   ✓ move element > rectangles with binding arrow 318ms
+ ✓ packages/excalidraw/tests/partialEraser.test.tsx (10 tests) 1738ms
+ ✓ packages/excalidraw/tests/pan.test.tsx (10 tests) 984ms
+ ✓ packages/excalidraw/tests/multiPointCreate.test.tsx (6 tests) 904ms
+ ✓ packages/element/tests/dragElements.test.ts (7 tests) 20ms
+ ✓ packages/common/src/utils.test.ts (11 tests) 18ms
+ ✓ packages/common/tests/keys.test.ts (8 tests) 3ms
+ ✓ packages/excalidraw/tests/export.test.tsx (9 tests) 739ms
+ ✓ packages/math/tests/pca.test.ts (16 tests) 8ms
+ ✓ packages/excalidraw/tests/renderEnvironmentLabels.test.tsx (6 tests) 954ms
+   ✓ bound labels re-measured with the host's render environment > when dragging a bound shape 334ms
+ ✓ packages/excalidraw/actions/actionDeleteSelected.test.tsx (8 tests) 825ms
+ ✓ packages/excalidraw/eraser/partialErase.test.ts (10 tests) 7ms
+ ✓ packages/excalidraw/actions/actionFlip.test.tsx (5 tests) 581ms
+ ✓ packages/excalidraw/components/FontPicker/FontPicker.test.tsx (6 tests) 2065ms
+   ✓ FontPicker > top picks drag & drop > pins a font dragged from the list, replacing the hovered slot 444ms
+   ✓ FontPicker > top picks drag & drop > refuses pinning an already pinned font 364ms
+   ✓ FontPicker > top picks drag & drop > reorders picks dragged within the strip 335ms
+   ✓ FontPicker > top picks drag & drop > pads a short customized list with unpicked defaults 616ms
+ ✓ packages/math/tests/ellipse.test.ts (8 tests) 4ms
+stderr | packages/excalidraw/tests/MermaidToExcalidraw.test.tsx > Test <MermaidToExcalidraw/> > should show error in preview when mermaid library throws error
+<<< WARNING: test "Test <MermaidToExcalidraw/> > should show error in preview when mermaid library throws error" does not wrap some state update in act() >>>
+
+ ✓ packages/excalidraw/tests/MermaidToExcalidraw.test.tsx (3 tests) 334ms
+ ✓ packages/excalidraw/tests/viewMode.test.tsx (6 tests) 721ms
+ ✓ packages/excalidraw/tests/actionStyles.test.tsx (6 tests) 961ms
+   ✓ actionStyles > should copy & paste styles via keyboard 446ms
+ ✓ packages/excalidraw/tests/toolDrag.test.tsx (5 tests) 652ms
+   ✓ dragging a tool out of the toolbar > previews while dragging without touching the scene, and drops one note 331ms
+ ✓ packages/excalidraw/tests/animation.test.ts (6 tests) 6ms
+ ✓ packages/excalidraw/tests/cursorHint.test.tsx (13 tests) 1939ms
+   ✓ cursor hint > shows hint when cycling arrow types via shortcut, and auto-hides it 1016ms
+ ✓ packages/excalidraw/tests/search.test.tsx (5 tests) 1986ms
+   ✓ search > should match text and cycle through matches on Enter 467ms
+   ✓ search > should match text split across multiple lines 804ms
+   ✓ search > should match frame names 444ms
+ ✓ packages/excalidraw/tests/created.test.tsx (6 tests) 631ms
+ ✓ packages/utils/tests/geometry.test.ts (5 tests) 7ms
+ ✓ packages/excalidraw/clipboard.test.ts (5 tests) 15ms
+ ✓ packages/excalidraw/tests/scroll.test.tsx (3 tests) 354ms
+stderr | packages/excalidraw/tests/image.test.tsx > image insertion > passes host-configured max image dimensions to the resize helper
+Error: Image cache update resulted with an error.
+    at /Users/alejandramendoza/excalidraw/packages/excalidraw/components/App.tsx:10519:21
+
+ ✓ packages/excalidraw/tests/charts.test.tsx (9 tests) 17ms
+ ✓ packages/excalidraw/tests/image.test.tsx (6 tests) 658ms
+ ✓ packages/excalidraw/tests/colorPickerHotkeys.test.ts (4 tests) 6ms
+ ✓ packages/excalidraw/tests/packages/events.test.tsx (5 tests) 538ms
+ ✓ packages/math/tests/polygon.test.ts (11 tests) 4ms
+ ✓ packages/excalidraw/components/DefaultSidebar.test.tsx (7 tests) 653ms
+ ✓ packages/excalidraw/tests/colorTargets.test.ts (5 tests) 4ms
+ ✓ packages/common/tests/binary-heap.test.ts (11 tests) 5ms
+ ✓ packages/excalidraw/renderer/helpers.test.ts (8 tests) 8ms
+ ✓ packages/excalidraw/data/library.test.ts (1 test) 3ms
+ ✓ packages/element/tests/renderEnvironmentCaches.test.ts (2 tests) 4ms
+ ✓ packages/element/tests/typeChecks.test.ts (5 tests) 4ms
+ ✓ packages/excalidraw/tests/appStateHooks.test.tsx (2 tests) 42ms
+ ✓ packages/excalidraw/tests/eyeDropper.test.tsx (3 tests) 379ms
+ ✓ packages/math/tests/curve.test.ts (6 tests) 5ms
+ ✓ packages/element/tests/distribute.test.tsx (4 tests) 1043ms
+   ✓ distributing > should distribute selected elements horizontally 383ms
+ ✓ excalidraw-app/tests/sentry.test.ts (6 tests) 18ms
+ ✓ packages/excalidraw/components/Trans.test.tsx (1 test) 37ms
+ ✓ packages/excalidraw/components/TTDDialog/common.test.ts (2 tests) 3ms
+ ✓ packages/excalidraw/components/hoc/withInternalFallback.test.tsx (4 tests) 453ms
+ ✓ packages/element/tests/sizeHelpers.test.ts (7 tests) 2ms
+ ✓ packages/utils/tests/utils.unmocked.test.ts (2 tests | 1 skipped) 24ms
+ ✓ packages/excalidraw/tests/zoomMenu.test.tsx (3 tests) 345ms
+ ✓ packages/excalidraw/mermaid.test.ts (4 tests) 4ms
+ ✓ packages/excalidraw/tests/convertElementType.binding.test.tsx (8 tests) 886ms
+ ✓ packages/excalidraw/tests/appState.test.tsx (2 tests) 343ms
+ ✓ packages/excalidraw/tests/viewport.test.ts (6 tests) 5ms
+ ✓ packages/excalidraw/tests/rotate.test.tsx (2 tests) 667ms
+   ✓ unselected bound arrow updates when rotating its target element 362ms
+   ✓ unselected bound arrows update when rotating their target elements 305ms
+ ✓ packages/common/src/appEventBus.test.ts (4 tests) 3ms
+ ✓ packages/excalidraw/components/UserList.test.tsx (1 test) 254ms
+ ✓ packages/element/tests/shape.test.ts (6 tests) 5ms
+ ✓ packages/excalidraw/components/Popover.test.tsx (2 tests) 18ms
+ ✓ packages/math/tests/range.test.ts (7 tests) 2ms
+ ✓ packages/excalidraw/tests/convertElementType.test.tsx (3 tests) 410ms
+ ✓ packages/excalidraw/actions/actionElementLock.test.tsx (2 tests) 319ms
+ ✓ packages/excalidraw/tests/freedrawMode.test.tsx (2 tests) 423ms
+ ✓ packages/element/src/__tests__/flowchart.test.ts (1 test) 15ms
+ ✓ packages/excalidraw/tests/embeddable.test.tsx (1 test) 389ms
+   ✓ embeddables > autoplays a Google Drive video on first activation only 385ms
+ ✓ packages/excalidraw/components/positionElementBesideCursor.test.ts (4 tests) 2ms
+ ✓ packages/common/tests/queue.test.ts (2 tests) 112ms
+ ✓ packages/excalidraw/tests/fontTopPicks.test.ts (3 tests) 3ms
+ ✓ excalidraw-app/tests/LanguageList.test.tsx (1 test) 375ms
+   ✓ Test LanguageList > rerenders UI on language change 374ms
+ ✓ packages/excalidraw/tests/colorTopPicks.test.ts (2 tests) 10ms
+ ✓ packages/common/tests/url.test.tsx (1 test) 4ms
+ ✓ packages/excalidraw/components/dropdownMenu/DropdownMenu.test.tsx (3 tests) 919ms
+   ✓ Test <DropdownMenu/> > closes main menu on outside pointer and touch events after reopening 389ms
+   ✓ Test <DropdownMenu/> > closes more tools on outside pointer and touch events after reopening 313ms
+ ✓ packages/element/tests/selection.test.ts (2 tests) 4ms
+ ✓ packages/math/tests/segment.test.ts (5 tests) 3ms
+ ✓ packages/element/tests/newElement.test.ts (15 tests) 7ms
+ ✓ packages/excalidraw/tests/clients.test.ts (8 tests) 8ms
+ ✓ packages/math/tests/line.test.ts (3 tests) 2ms
+ ✓ packages/math/tests/point.test.ts (1 test) 3ms
+ ✓ excalidraw-app/tests/appRoutes.test.ts (1 test) 2ms
+ ✓ packages/excalidraw/tests/App.test.tsx (1 test) 138ms
+ ✓ packages/math/tests/vector.test.ts (1 test) 7ms
+ ✓ packages/excalidraw/tests/shortcuts.test.tsx (1 test) 145ms
+ ✓ excalidraw-app/tests/MobileMenu.test.tsx (2 tests) 156ms
+stderr | excalidraw-app/tests/firebase.test.ts
+Error JSON parsing firebase config. Supplied value: undefined
+
+ ✓ excalidraw-app/tests/firebase.test.ts (1 test) 2ms
+
+ Test Files  159 passed (159)
+      Tests  2826 passed | 47 skipped | 1 todo (2874)
+   Start at  18:08:09
+   Duration  63.20s (transform 5.44s, setup 29.25s, collect 125.25s, tests 217.30s, environment 38.13s, prepare 7.58s)
+

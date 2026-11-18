@@ -1,0 +1,10 @@
+
+ RUN  v3.0.6 /Users/alejandramendoza/excalidraw
+
+ ✓ packages/element/tests/freedrawSplit.test.ts (15 tests) 7ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  17:26:53
+   Duration  989ms (transform 430ms, setup 161ms, collect 515ms, tests 7ms, environment 135ms, prepare 35ms)
+

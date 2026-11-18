@@ -1,0 +1,211 @@
+
+ RUN  v3.0.6 /Users/alejandramendoza/excalidraw
+
+ ❯ packages/element/tests/freedrawSplit.test.ts (15 tests | 13 failed) 9ms
+   ✓ splitFreedrawByPath — normal behaviour > givenEraserFarFromStroke_whenSplitting_returnsNullForNoChange
+   × splitFreedrawByPath — normal behaviour > givenEraserAcrossTheMiddle_whenSplitting_returnsTwoFragments 3ms
+     → Target cannot be null or undefined.
+   × splitFreedrawByPath — normal behaviour > givenEraserAcrossOneEnd_whenSplitting_returnsOneShorterFragment 0ms
+     → Target cannot be null or undefined.
+   × splitFreedrawByPath — normal behaviour > givenEraserCoveringWholeStroke_whenSplitting_returnsEmptyArray 1ms
+     → expected null to deeply equal []
+   × splitFreedrawByPath — normal behaviour > givenEraserCrossingTwice_whenSplitting_returnsThreeFragments 0ms
+     → Target cannot be null or undefined.
+   × splitFreedrawByPath — normal behaviour > givenAnyCut_whenSplitting_everySurvivingPointIsOutsideTheTolerance 0ms
+     → fragments is not iterable
+   × splitFreedrawByPath — fragment shape > givenFragment_whenSplit_firstPointIsOriginAndSizeMatchesPoints 0ms
+     → fragments is not iterable
+   × splitFreedrawByPath — fragment shape > givenRotatedStroke_whenSplit_survivingInkStaysWhereItWasDrawn 0ms
+     → Target cannot be null or undefined.
+   × splitFreedrawByPath — fragment shape > givenRecordedPressures_whenSplit_pressuresStayAlignedAndInterpolated 0ms
+     → fragments is not iterable
+   × splitFreedrawByPath — fragment shape > givenSimulatedPressure_whenSplit_pressuresStayEmpty 0ms
+     → fragments is not iterable
+   × splitFreedrawByPath — boundaries > givenSparseStroke_whenEraserPassesBetweenTwoSamples_stillCuts 0ms
+     → Target cannot be null or undefined.
+   ✓ splitFreedrawByPath — boundaries > givenEraserJustOutsideTolerance_whenSplitting_returnsNull
+   × splitFreedrawByPath — boundaries > givenTinyLeftoverPiece_whenBelowMinimumLength_isDropped 0ms
+     → Target cannot be null or undefined.
+   × splitFreedrawByPath — boundaries > givenSinglePointStroke_whenErased_returnsEmpty_andWhenMissed_returnsNull 0ms
+     → expected null to deeply equal []
+   × splitFreedrawByPath — boundaries > givenSinglePointEraserPath_whenOnTheStroke_cutsAroundThatPoint 0ms
+     → Target cannot be null or undefined.
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — normal behaviour > givenEraserAcrossTheMiddle_whenSplitting_returnsTwoFragments
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/element/tests/freedrawSplit.test.ts:110:23
+    108|     )!;
+    109| 
+    110|     expect(fragments).toHaveLength(2);
+       |                       ^
+    111|     const [left, right] = fragments.map((f) => fragmentScenePoints(el,…
+    112|     // the cut lands on the tolerance boundary, not on the nearest sam…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — normal behaviour > givenEraserAcrossOneEnd_whenSplitting_returnsOneShorterFragment
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/element/tests/freedrawSplit.test.ts:127:23
+    125|     )!;
+    126| 
+    127|     expect(fragments).toHaveLength(1);
+       |                       ^
+    128|     const pts = fragmentScenePoints(el, fragments[0]);
+    129|     expect(pts[0][0]).toBeCloseTo(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — normal behaviour > givenEraserCoveringWholeStroke_whenSplitting_returnsEmptyArray
+AssertionError: expected null to deeply equal []
+
+- Expected: 
+[]
+
++ Received: 
+null
+
+ ❯ packages/element/tests/freedrawSplit.test.ts:137:7
+    135|     expect(
+    136|       splitFreedrawByPath(el, path([-10, 0], [110, 0]), TOLERANCE),
+    137|     ).toEqual([]);
+       |       ^
+    138|   });
+    139| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — normal behaviour > givenEraserCrossingTwice_whenSplitting_returnsThreeFragments
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/element/tests/freedrawSplit.test.ts:146:23
+    144|     const fragments = splitFreedrawByPath(el, eraser, TOLERANCE)!;
+    145| 
+    146|     expect(fragments).toHaveLength(3);
+       |                       ^
+    147|   });
+    148| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — normal behaviour > givenAnyCut_whenSplitting_everySurvivingPointIsOutsideTheTolerance
+TypeError: fragments is not iterable
+ ❯ packages/element/tests/freedrawSplit.test.ts:154:21
+    152|     const fragments = splitFreedrawByPath(el, eraser, TOLERANCE)!;
+    153| 
+    154|     for (const f of fragments) {
+       |                     ^
+    155|       for (const p of fragmentScenePoints(el, f)) {
+    156|         // boundary points sit on the tolerance edge, allow float slack
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — fragment shape > givenFragment_whenSplit_firstPointIsOriginAndSizeMatchesPoints
+TypeError: fragments is not iterable
+ ❯ packages/element/tests/freedrawSplit.test.ts:174:21
+    172|     )!;
+    173| 
+    174|     for (const f of fragments) {
+       |                     ^
+    175|       expect(f.points[0]).toEqual([0, 0]);
+    176|       expect({ width: f.width, height: f.height }).toEqual(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — fragment shape > givenRotatedStroke_whenSplit_survivingInkStaysWhereItWasDrawn
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/element/tests/freedrawSplit.test.ts:192:23
+    190|     const fragments = splitFreedrawByPath(el, eraser, TOLERANCE)!;
+    191| 
+    192|     expect(fragments).toHaveLength(2);
+       |                       ^
+    193|     const ends = fragments.flatMap((f) => {
+    194|       const pts = fragmentScenePoints(el, f);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — fragment shape > givenRecordedPressures_whenSplit_pressuresStayAlignedAndInterpolated
+TypeError: fragments is not iterable
+ ❯ packages/element/tests/freedrawSplit.test.ts:213:21
+    211|     )!;
+    212| 
+    213|     for (const f of fragments) {
+       |                     ^
+    214|       expect(f.pressures).toHaveLength(f.points.length);
+    215|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — fragment shape > givenSimulatedPressure_whenSplit_pressuresStayEmpty
+TypeError: fragments is not iterable
+ ❯ packages/element/tests/freedrawSplit.test.ts:229:21
+    227|     )!;
+    228| 
+    229|     for (const f of fragments) {
+       |                     ^
+    230|       expect(f.pressures).toEqual([]);
+    231|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — boundaries > givenSparseStroke_whenEraserPassesBetweenTwoSamples_stillCuts
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/element/tests/freedrawSplit.test.ts:245:23
+    243|     )!;
+    244| 
+    245|     expect(fragments).toHaveLength(2);
+       |                       ^
+    246|   });
+    247| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — boundaries > givenTinyLeftoverPiece_whenBelowMinimumLength_isDropped
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/element/tests/freedrawSplit.test.ts:260:59
+    258|     const eraser = path([92, -20], [92, 20]);
+    259| 
+    260|     expect(splitFreedrawByPath(el, eraser, TOLERANCE, 0)).toHaveLength…
+       |                                                           ^
+    261|     expect(splitFreedrawByPath(el, eraser, TOLERANCE, 5)).toHaveLength…
+    262|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — boundaries > givenSinglePointStroke_whenErased_returnsEmpty_andWhenMissed_returnsNull
+AssertionError: expected null to deeply equal []
+
+- Expected: 
+[]
+
++ Received: 
+null
+
+ ❯ packages/element/tests/freedrawSplit.test.ts:273:73
+    271|     });
+    272| 
+    273|     expect(splitFreedrawByPath(el, path([0, 10], [20, 10]), TOLERANCE)…
+       |                                                                         ^
+    274|       [],
+    275|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯
+
+ FAIL  packages/element/tests/freedrawSplit.test.ts > splitFreedrawByPath — boundaries > givenSinglePointEraserPath_whenOnTheStroke_cutsAroundThatPoint
+AssertionError: Target cannot be null or undefined.
+ ❯ packages/element/tests/freedrawSplit.test.ts:286:23
+    284|     const fragments = splitFreedrawByPath(el, path([50, 0]), TOLERANCE…
+    285| 
+    286|     expect(fragments).toHaveLength(2);
+       |                       ^
+    287|   });
+    288| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  13 failed | 2 passed (15)
+   Start at  17:26:15
+   Duration  1.35s (transform 469ms, setup 229ms, collect 552ms, tests 9ms, environment 319ms, prepare 57ms)
+

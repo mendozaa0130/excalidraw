@@ -1,0 +1,120 @@
+
+ RUN  v3.0.6 /Users/alejandramendoza/excalidraw
+
+ ❯ packages/excalidraw/tests/partialEraser.test.tsx (7 tests | 5 failed) 626ms
+   × partial eraser — through the editor > givenEraserActive_whenUserClicksTheEraserButtonAgain_switchesToPartialAndBack 69ms
+     → expected undefined to be 'element' // Object.is equality
+   × partial eraser — through the editor > givenFreedrawStroke_whenUserErasesItsMiddleInPartialMode_itSplitsAndOneUndoRestoresIt 116ms
+     → expected [] to have a length of 2 but got +0
+   × partial eraser — through the editor > givenRectangleUnderTheEraser_whenErasingInPartialMode_rectangleSurvives 100ms
+     → expected true to be false // Object.is equality
+   ✓ partial eraser — through the editor > givenElementMode_whenErasingAcrossAStroke_wholeStrokeIsDeletedAsBefore
+   × partial eraser — through the editor > givenHostApp_whenItSetsEraserModeViaUpdateScene_editorUsesIt 88ms
+     → expected [] to have a length of 2 but got +0
+   × partial eraser — through the editor > givenPartialMode_whenUserClicksOnAStrokeWithoutDragging_cutsAGapAtThatPoint 81ms
+     → expected [] to have a length of 2 but got +0
+   ✓ partial eraser — through the editor > givenLockedStroke_whenErasingInPartialMode_isNotCut
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/excalidraw/tests/partialEraser.test.tsx > partial eraser — through the editor > givenEraserActive_whenUserClicksTheEraserButtonAgain_switchesToPartialAndBack
+AssertionError: expected undefined to be 'element' // Object.is equality
+
+- Expected: 
+"element"
+
++ Received: 
+undefined
+
+ ❯ packages/excalidraw/tests/partialEraser.test.tsx:73:32
+     71| 
+     72|   it("givenEraserActive_whenUserClicksTheEraserButtonAgain_switchesToP…
+     73|     expect(h.state.eraserMode).toBe("element");
+       |                                ^
+     74| 
+     75|     UI.clickTool("eraser");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  packages/excalidraw/tests/partialEraser.test.tsx > partial eraser — through the editor > givenFreedrawStroke_whenUserErasesItsMiddleInPartialMode_itSplitsAndOneUndoRestoresIt
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ packages/excalidraw/tests/partialEraser.test.tsx:98:23
+     96| 
+     97|     const fragments = liveFreedraw();
+     98|     expect(fragments).toHaveLength(2);
+       |                       ^
+     99|     expect(fragments.map((e) => e.id)).not.toContain(original.id);
+    100|     expect(h.elements.find((e) => e.id === original.id)?.isDeleted).to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  packages/excalidraw/tests/partialEraser.test.tsx > partial eraser — through the editor > givenRectangleUnderTheEraser_whenErasingInPartialMode_rectangleSurvives
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ packages/excalidraw/tests/partialEraser.test.tsx:130:65
+    128|     eraseAcross(150, 200);
+    129| 
+    130|     expect(h.elements.find((e) => e.id === rect.id)?.isDeleted).toBe(f…
+       |                                                                 ^
+    131|     expect(liveFreedraw()).toHaveLength(2);
+    132|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  packages/excalidraw/tests/partialEraser.test.tsx > partial eraser — through the editor > givenHostApp_whenItSetsEraserModeViaUpdateScene_editorUsesIt
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ packages/excalidraw/tests/partialEraser.test.tsx:150:28
+    148|     eraseAcross(150, 100);
+    149| 
+    150|     expect(liveFreedraw()).toHaveLength(2);
+       |                            ^
+    151|   });
+    152| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  packages/excalidraw/tests/partialEraser.test.tsx > partial eraser — through the editor > givenPartialMode_whenUserClicksOnAStrokeWithoutDragging_cutsAGapAtThatPoint
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ packages/excalidraw/tests/partialEraser.test.tsx:161:28
+    159|     mouse.click();
+    160| 
+    161|     expect(liveFreedraw()).toHaveLength(2);
+       |                            ^
+    162|   });
+    163| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 2 passed (7)
+   Start at  17:29:44
+   Duration  3.50s (transform 1.64s, setup 211ms, collect 2.21s, tests 626ms, environment 241ms, prepare 37ms)
+

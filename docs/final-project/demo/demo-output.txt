@@ -1,0 +1,5 @@
+before: [ 'freedraw:nHHI4a', 'rectangle:SjpETV' ]
+eraserMode: partial | button label: Eraser (partial: cuts pen strokes) | hint: Erasing parts of pen strokes. Click the eraser again to erase whole elements
+after: [ 'freedraw:O3Yhac', 'freedraw:vKDxzX', 'rectangle:SjpETV' ]
+after undo: [ 'freedraw:nHHI4a', 'rectangle:SjpETV' ]
+page errors: none
