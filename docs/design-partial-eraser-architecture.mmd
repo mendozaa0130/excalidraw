@@ -1,0 +1,49 @@
+%% Partial eraser marked on the A3 logical architecture.
+%% Orange = new code; yellow = existing code changed; arrows are only the
+%% dependencies this feature adds or uses (all downward).
+
+flowchart TB
+    subgraph L1["Layer 1 · Application / integration"]
+        direction LR
+        a2["excalidraw-app/collab/<br/>(unchanged: broadcasts the delete + new elements)"]
+    end
+
+    subgraph L2["Layer 2 · Editor / UI — packages/excalidraw"]
+        direction LR
+        e1["components/App.tsx<br/>pointer-up eraser branch"]
+        e9["eraser/index.ts<br/>EraserTrail (collects touched strokes + path)"]
+        e10["eraser/partialErase.ts<br/>NEW: applyPartialErase()"]
+        e2["actions/actionToggleEraserMode.ts<br/>NEW"]
+        e11["components/Tools.tsx · Toolbar.tsx<br/>click-active-eraser toggles mode"]
+        e12["appState.ts · types.ts<br/>NEW AppState.eraserMode"]
+        e5["data/restore.ts<br/>restore/validate eraserMode"]
+    end
+
+    subgraph L3["Layer 3 · Domain — packages/element"]
+        direction LR
+        d7["freedrawSplit.ts<br/>NEW: splitFreedrawByPath() — pure"]
+        d4["newElement.ts<br/>newFreeDrawElement (reused)"]
+        d8["fractionalIndex.ts<br/>syncMovedIndices (reused)"]
+    end
+
+    subgraph L4["Layer 4 · Foundation"]
+        direction LR
+        m1["packages/math<br/>segment / point distance (reused)"]
+        c1["packages/common<br/>getSizeFromPoints (reused)"]
+    end
+
+    e1 --> e9
+    e1 --> e10
+    e11 --> e2
+    e2 --> e12
+    e10 --> d7
+    e10 --> d4
+    e10 --> d8
+    d7 --> m1
+    d7 --> c1
+    e1 -. "scene change" .-> a2
+
+    classDef new fill:#ffcc80,stroke:#e65100,color:#000
+    classDef changed fill:#fff59d,stroke:#f9a825,color:#000
+    class e10,e2,d7 new
+    class e1,e9,e11,e12,e5 changed
